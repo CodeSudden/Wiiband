@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
 
 // Configure database connection using the connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -42,11 +43,18 @@ builder.Services.AddAuthentication(options =>
 {
     string? clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
     string? clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
-    //options.ClientId = "902330764120-bpqt26o85gt02rk6r2dj9k7c0rqnin37.apps.googleusercontent.com";  // Use the client_id from the JSON
-    //options.ClientSecret = "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";  // Use the client_secret from the JSON
-    options.Scope.Add(Google.Apis.Calendar.v3.CalendarService.Scope.Calendar);  // Add the Google Calendar scope
-    options.SaveTokens = true;  // This ensures the access tokens are saved and accessible for API requests
+
+    if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
+    {
+        throw new ArgumentException("Google ClientId and ClientSecret must be provided.");
+    }
+
+    options.ClientId = clientId;
+    options.ClientSecret = clientSecret;
+    options.Scope.Add(Google.Apis.Calendar.v3.CalendarService.Scope.Calendar);
+    options.SaveTokens = true;
 });
+
 
 // Register IHttpContextAccessor to access tokens
 builder.Services.AddHttpContextAccessor();
@@ -73,6 +81,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 // Map the SignalR hub
 app.MapHub<StaffDashboardHub>("/StaffDashboardHub");

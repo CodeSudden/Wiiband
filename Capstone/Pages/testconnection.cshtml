@@ -1,0 +1,11 @@
+﻿@page
+@model Capstone.Pages.TestconnectionModel
+@{
+    var googleClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+
+    <p>@Model.Message</p>
+}
+
+<script>
+    console.log("Google Client ID: @googleClientId");
+</script>
