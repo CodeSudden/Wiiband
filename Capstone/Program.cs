@@ -6,6 +6,9 @@ using Google;
 using Microsoft.EntityFrameworkCore;
 using Capstone.Hubs;
 using Capstone.Data;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,8 +40,10 @@ builder.Services.AddAuthentication(options =>
 .AddCookie()
 .AddGoogle(options =>
 {
-    options.ClientId = "902330764120-bpqt26o85gt02rk6r2dj9k7c0rqnin37.apps.googleusercontent.com";  // Use the client_id from the JSON
-    options.ClientSecret = "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";  // Use the client_secret from the JSON
+    string? clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+    string? clientSecret = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
+    //options.ClientId = "902330764120-bpqt26o85gt02rk6r2dj9k7c0rqnin37.apps.googleusercontent.com";  // Use the client_id from the JSON
+    //options.ClientSecret = "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";  // Use the client_secret from the JSON
     options.Scope.Add(Google.Apis.Calendar.v3.CalendarService.Scope.Calendar);  // Add the Google Calendar scope
     options.SaveTokens = true;  // This ensures the access tokens are saved and accessible for API requests
 });
