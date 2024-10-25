@@ -1,0 +1,257 @@
+﻿@page
+@model Capstone.Pages.Admin.Admin_DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<!-- Announcement Section -->
+<div class="container mt-4">
+    <div class="alert alert-info d-flex align-items-center shadow-sm p-3 rounded mb-4" role="alert">
+        <i class="bi bi-megaphone-fill me-3" style="font-size: 1.5rem;"></i>
+        <div>
+            <strong>Announcement:</strong> The next system maintenance is scheduled for August 15, 2024. Please save your work in advance.
+        </div>
+    </div>
+</div>
+
+<!-- Page Title -->
+<div class="row mb-4">
+    <div class="col">
+        <h2>Dashboard - Fiesta Carnival</h2>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- Info Boxes -->
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-calendar-check icon"></i>
+                <div class="info-text">
+                    <h5>August 1</h5>
+                    <p>2024</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-people-fill icon"></i>
+                <div class="info-text">
+                    <h5>12</h5>
+                    <p>Visitors</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-currency-dollar icon"></i>
+                <div class="info-text">
+                    <h5>₱5988</h5>
+                    <p>Total Sales</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="d-flex justify-content-between mb-4">
+        <h3>Transaction</h3>
+        <form method="post">
+            <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
+                <option value="">All</option>
+                <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
+                <option value="Charging" selected="@((Model.StatusFilter == "Charging") ? true : false)">Charging</option>
+                <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Transaction Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="transaction-table">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Transaction Number</th>
+                                <th>Wiiband</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Remaining Time</th>
+                                <th>Status</th>
+                                <th>Battery</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model.Transactions)
+                            {
+                                <tr>
+                                    <td>@transaction.TransactionNumber</td>
+                                    <td>@transaction.Wiiband</td>
+                                    <td>@transaction.StartTime</td>
+                                    <td>@transaction.EndTime</td>
+                                    <td>@transaction.RemainingTime</td>
+                                    <td>
+                                        <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Charging" ? "bg-warning text-dark" : "bg-secondary")">
+                                            @transaction.Status
+                                        </span>
+                                    </td>
+                                    <td>@transaction.Battery</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Minimalist CSS Style -->
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    .container {
+        margin-top: 20px;
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-download {
+        background-color: #007bff;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 4px;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-download:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+        }
+
+        .btn-download i {
+            margin-right: 10px;
+        }
+
+    .info-card {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card .icon {
+            font-size: 3rem;
+            color: #007bff;
+            margin-right: 20px;
+        }
+
+    .info-text h5 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: bold;
+    }
+
+    .info-text p {
+        margin: 0;
+        color: #6c757d;
+    }
+
+    .transaction-table {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+        .table-header h3 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+    td {
+        color: #555;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    /* Hover Effect for Shadows */
+    .shadow-hover {
+        transition: box-shadow 0.3s ease;
+    }
+
+        .shadow-hover:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Responsive styles */
+    @@media (max-width: 768px) {
+        .info-card {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .info-card .icon {
+            margin-bottom: 10px;
+        }
+
+        .info-text h5 {
+            font-size: 1.5rem;
+        }
+    }
+</style>

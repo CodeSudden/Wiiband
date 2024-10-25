@@ -1,0 +1,473 @@
+﻿@page
+@model Capstone.Pages.Staff.StaffEventModel
+@{
+    ViewData["Title"] = "Event Management";
+    Layout = "_StaffLayout";
+    @using Newtonsoft.Json;
+
+    // Serialize the upcoming events to JSON to pass to the FullCalendar
+    var calendarEventsJson = JsonConvert.SerializeObject(Model.UpcomingEvents.Select(e => new
+    {
+        title = e.Name,
+        start = e.Date.ToString("yyyy-MM-dd"),  // FullCalendar expects the date format as yyyy-MM-dd
+        end = e.Date.AddDays(1).ToString("yyyy-MM-dd"),  // Assuming the event is a one-day event, adjust as needed
+        description = e.Description,
+        attendees = e.Attendees
+    }));
+}
+
+<!-- Bootstrap CSS and JS -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="container mt-5">
+    <!-- Calendar Section with New Event Button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary mb-0">Event Calendar</h2>
+        <button type="button" class="btn btn-primary" id="openEventModal">
+            + New Event
+        </button>
+    </div>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div id="eventCalendar" style="height: 500px;"></div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Upcoming Events</h4>
+
+            <!-- Filter Dropdown Button -->
+            <div class="btn-group">
+                <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filter Events
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="all">All</a></li>
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="nearest">Nearest Events</a></li>
+                    <li><a class="dropdown-item filter-option" href="#" data-filter="completed">Completed Events</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="upcomingEventsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Attendees</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var upcomingEvent in Model.UpcomingEvents)
+                        {
+                            <tr class="event-row" data-date="@upcomingEvent.Date.ToString("yyyy-MM-dd")">
+                                <td>@upcomingEvent.Name</td>
+                                <td>@upcomingEvent.Date.ToString("MMMM dd, yyyy")</td>
+                                <td>@upcomingEvent.Location</td>
+                                <td>@upcomingEvent.Attendees</td>
+                                <td>
+                                    <span class="badge bg-@(@upcomingEvent.IsConfirmed ? "success" : "warning")">
+                                        @(@upcomingEvent.IsConfirmed ? "Confirmed" : "Pending")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Package Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="eventModalLabel">Create Custom Package</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="post" id="customPackageForm" onsubmit="openContractModal(event)">
+                    <!-- Customer Information -->
+                    <h6>Customer Information</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="CustomerName" class="form-control rounded-pill" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="CustomerEmail" class="form-control rounded-pill" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="CustomerPhone" class="form-control rounded-pill" required />
+                    </div>
+
+                    <!-- Event Date and Time -->
+                    <h6>Event Date and Time</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Event Date</label>
+                        <input type="date" name="EventDate" class="form-control rounded-pill" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Event Time</label>
+                        <input type="time" name="EventTime" class="form-control rounded-pill" required />
+                    </div>
+
+                    <!-- Jumping Package -->
+                    <h6>Jumping Package</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Time</label>
+                        <select name="JumpTime" class="form-select rounded-pill">
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Number of Jumpers</label>
+                        <input type="number" name="NumberOfJumpers" class="form-control rounded-pill" min="1" required />
+                        <small>₱499/head</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Number of Socks</label>
+                        <input type="number" name="NumberOfSocks" class="form-control rounded-pill" min="1" required />
+                    </div>
+
+                    <!-- Add-ons -->
+                    <h6>Add-ons</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="EInvitation" id="eInvitation">
+                        <label class="form-check-label" for="eInvitation">E-Invitation</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="GameCoach" id="gameCoach">
+                        <label class="form-check-label" for="gameCoach">2 Game Coach</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trampoline Games (How many?)</label>
+                        <input type="number" name="TrampolineGames" class="form-control rounded-pill" min="1" required />
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="WaterBottle" id="waterBottle">
+                        <label class="form-check-label" for="waterBottle">Water Bottle</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="MelonaIceCream" id="melonaIceCream">
+                        <label class="form-check-label" for="melonaIceCream">Melona Ice Cream</label>
+                    </div>
+
+                    <!-- Party Area -->
+                    <h6>Party Area</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="PartyArea" id="partyArea" onchange="togglePartyAreaDetails(this)">
+                        <label class="form-check-label" for="partyArea">Party Area</label>
+                    </div>
+                    <div id="partyAreaDetails" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">How many guests?</label>
+                            <input type="number" name="PartyGuests" class="form-control rounded-pill" min="1" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">How many hours?</label>
+                            <input type="number" name="PartyHours" class="form-control rounded-pill" min="1" />
+                        </div>
+                        <small>Includes: Tables, Chairs, Tablecloth, Sound System</small>
+                    </div>
+
+                    <!-- Party Decorations -->
+                    <h6>Party Decorations</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="PartyDecorations" id="partyDecorations" onchange="toggleDecorationOptions(this)">
+                        <label class="form-check-label" for="partyDecorations">Party Decorations</label>
+                    </div>
+                    <div id="decorationOptions" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Choose a package</label>
+                            <select name="DecorationPackage" class="form-select rounded-pill">
+                                <option value="HalfDeck">Half Deck - ₱8,000</option>
+                                <option value="WholeDeck">Whole Deck - ₱15,000</option>
+                                <option value="Premium">Premium - ₱25,000</option>
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="FoodCart" id="foodCart" onchange="toggleFoodCart(this)">
+                            <label class="form-check-label" for="foodCart">Include a food cart?</label>
+                        </div>
+                        <div id="foodCartOptions" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Electricity Charge per food cart</label>
+                                <input type="number" name="ElectricityCharge" class="form-control rounded-pill" value="1000" readonly />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Party Equipment -->
+                    <h6>Party Equipment</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="PartyEquipment" id="partyEquipment" onchange="toggleEquipmentOptions(this)">
+                        <label class="form-check-label" for="partyEquipment">Party Equipment</label>
+                    </div>
+                    <div id="equipmentOptions" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Chafing Dish (₱500/pc)</label>
+                            <input type="number" name="ChafingDish" class="form-control rounded-pill" min="1" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Plates, Glass, Spoon & Fork (₱100 per person)</label>
+                            <input type="number" name="PartyUtensils" class="form-control rounded-pill" min="1" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 mt-3">Create Package</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="eventDetailsModalTitle">Event Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="eventDetailsModalBody">
+                <!-- Event details will be populated here dynamically -->
+                <div id="noEventsMessage" style="display: none;">
+                    <p>No events scheduled for this day.</p>
+                </div>
+                <div id="eventDetailsContent" style="display: none;">
+                    <div class="event-detail">
+                        <h5 id="eventTitle"></h5>
+                        <p><strong>Start:</strong> <span id="eventStart"></span></p>
+                        <p><strong>End:</strong> <span id="eventEnd"></span></p>
+                        <p><strong>Description:</strong> <span id="eventDescription"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar Script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.0.2/index.global.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const calendarEl = document.getElementById('eventCalendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: @Html.Raw(calendarEventsJson),  // Load events from the backend
+            // Handle date click to show events for that date
+            dateClick: function (info) {
+                const clickedDate = info.dateStr;
+                const eventsForDay = calendar.getEvents().filter(event => event.startStr === clickedDate);
+
+                populateEventDetailsModal(eventsForDay, clickedDate);
+
+                const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+                eventDetailsModal.show();
+            }
+        });
+        calendar.render();
+
+        // Show the event creation modal when "+ New Event" is clicked
+        document.getElementById('openEventModal').addEventListener('click', function () {
+            const bookingModal = new bootstrap.Modal(document.getElementById('eventModal'));
+            bookingModal.show();
+        });
+
+        // Filter logic
+        const filterOptions = document.querySelectorAll('.filter-option');
+        const rows = document.querySelectorAll('.event-row');
+        const today = new Date();
+
+        filterOptions.forEach(option => {
+            option.addEventListener('click', function (e) {
+                e.preventDefault();
+                const filter = this.getAttribute('data-filter');
+
+                rows.forEach(row => {
+                    const eventDateStr = row.getAttribute('data-date');
+                    const eventDate = new Date(eventDateStr);
+
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else if (filter === 'nearest') {
+                        // Show upcoming events (today or in the future)
+                        if (eventDate >= today) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    } else if (filter === 'completed') {
+                        // Show past events
+                        if (eventDate < today) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+    });
+
+    function populateEventDetailsModal(events, clickedDate) {
+        const modalBody = document.getElementById('eventDetailsModalBody');
+        modalBody.innerHTML = ''; // Clear existing content
+        if (events.length > 0) {
+            events.forEach(event => {
+                const eventDetails = `
+                        <div class="event-detail">
+                            <h5>${event.title}</h5>
+                            <p><strong>Start:</strong> ${event.start.toLocaleString()}</p>
+                            <p><strong>End:</strong> ${event.end ? event.end.toLocaleString() : 'N/A'}</p>
+                            <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
+                        </div><hr>`;
+                modalBody.innerHTML += eventDetails;
+            });
+        } else {
+            modalBody.innerHTML = '<p>No events scheduled for this day.</p>';
+        }
+    }
+
+    function openContractModal(event) {
+        event.preventDefault();
+        const bookingModal = new bootstrap.Modal(document.getElementById('contractModal'));
+        bookingModal.show();
+    }
+
+ 
+
+    // Function to populate the event details modal with events for the clicked date
+    function populateEventDetailsModal(events, clickedDate) {
+        const modalBody = document.getElementById('eventDetailsModalBody');
+        const modalTitle = document.getElementById('eventDetailsModalTitle');
+        const noEventsMessage = document.getElementById('noEventsMessage');
+        const eventDetailsContent = document.getElementById('eventDetailsContent');
+        const eventTitle = document.getElementById('eventTitle');
+        const eventStart = document.getElementById('eventStart');
+        const eventEnd = document.getElementById('eventEnd');
+        const eventDescription = document.getElementById('eventDescription');
+
+        // Reset modal content
+        modalTitle.innerHTML = `Events on ${clickedDate}`;
+        modalBody.innerHTML = ''; // Clear any previous content
+
+        if (events.length > 0) {
+            events.forEach(event => {
+                const eventDetails = `
+                                <div class="event-detail">
+                                    <h5>${event.title}</h5>
+                                    <p><strong>Start:</strong> ${event.start.toLocaleString()}</p>
+                                    <p><strong>End:</strong> ${event.end ? event.end.toLocaleString() : 'N/A'}</p>
+                                    <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
+                                </div>
+                                <hr />
+                            `;
+                modalBody.innerHTML += eventDetails;
+            });
+        } else {
+            modalBody.innerHTML = '<p>No events scheduled for this day.</p>';
+        }
+    }
+
+    function openContractModal(event) {
+        event.preventDefault();
+        const bookingModal = new bootstrap.Modal(document.getElementById('contractModal'));
+        bookingModal.show();
+    }
+
+    function togglePartyAreaDetails(checkbox) {
+        const details = document.getElementById('partyAreaDetails');
+        details.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function toggleDecorationOptions(checkbox) {
+        const options = document.getElementById('decorationOptions');
+        options.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function toggleFoodCart(checkbox) {
+        const options = document.getElementById('foodCartOptions');
+        options.style.display = checkbox.checked ? 'block' : 'none';
+    }
+
+    function toggleEquipmentOptions(checkbox) {
+        const options = document.getElementById('equipmentOptions');
+        options.style.display = checkbox.checked ? 'block' : 'none';
+    }
+</script>
+
+
+<!-- Styles -->
+<style>
+    /* Remove underlines from event titles */
+    .fc .fc-daygrid-event, .fc .fc-daygrid-event a, .fc .fc-event-title, .fc .fc-event-title a {
+        text-decoration: none !important;
+        color: inherit !important; /* Ensure color is inherited to avoid default link styling */
+    }
+
+    /* If the underline is due to links or other styled elements in the calendar */
+    .fc a {
+        text-decoration: none !important;
+    }
+
+    /* Remove any underlines from the day grid */
+    .fc-daygrid-day, .fc-daygrid-day a {
+        text-decoration: none !important;
+    }
+
+    .card-header {
+        font-size: 1.25rem;
+        font-weight: 600;
+        background-color: #0d6efd;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.5em;
+    }
+
+    .modal-content {
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .btn-primary {
+        border-radius: 0.5rem;
+        font-weight: 500;
+        padding: 0.75em 1.5em;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0.5rem;
+        padding: 0.5em;
+    }
+
+    table.table-hover tbody tr:hover {
+        background-color: #f0f8ff;
+    }
+
+    .fc-daygrid-day:hover {
+        background-color: #f0f8ff;
+        transition: background-color 0.2s ease-in-out;
+    }
+</style>

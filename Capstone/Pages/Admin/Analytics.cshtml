@@ -1,0 +1,232 @@
+﻿@page
+@model Capstone.Pages.Admin.AnalyticsModel
+@{
+    ViewData["Title"] = "Analytics";
+    Layout = "_AdminLayout";
+}
+
+<!-- Minimalistic Analytics Dashboard -->
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Analytics Dashboard</h2>
+
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end mb-4">
+        <button class="btn btn-primary me-2" id="forecastBtn">Forecasting</button>
+        <button class="btn btn-secondary" id="generateReportBtn">Generate Report</button>
+    </div>
+
+    <!-- KPIs Section -->
+    <div id="reportContent">
+        <div class="row text-center mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card kpi-card shadow-sm p-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-people-fill kpi-icon me-3"></i>
+                        <div>
+                            <h5 class="kpi-title mb-1">Total Attendees</h5>
+                            <h3 class="kpi-value mb-0">12,345</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card kpi-card shadow-sm p-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="bi bi-cash-coin kpi-icon me-3"></i>
+                        <div>
+                            <h5 class="kpi-title mb-1">Total Sales</h5>
+                            <h3 class="kpi-value mb-0">₱120,000</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm p-3">
+                    <h6>Attendees Overview</h6>
+                    <canvas id="attendeesChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm p-3">
+                    <h6>Store Sales</h6>
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activities Table -->
+        <div class="card shadow-sm p-3">
+            <h6>Top Activities</h6>
+            <table class="table table-hover mt-3">
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Participants</th>
+                        <th>Avg. Time Spent</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Island Zone</td>
+                        <td>3,500</td>
+                        <td>1h 15m</td>
+                    </tr>
+                    <tr>
+                        <td>Foam Pit</td>
+                        <td>2,890</td>
+                        <td>45m</td>
+                    </tr>
+                    <tr>
+                        <td>Dodge Ball</td>
+                        <td>2,540</td>
+                        <td>1h 5m</td>
+                    </tr>
+                    <tr>
+                        <td>Sticky Wall</td>
+                        <td>1,850</td>
+                        <td>1h 10m</td>
+                    </tr>
+                    <tr>
+                        <td>Zipline</td>
+                        <td>1,500</td>
+                        <td>30m</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html2pdf.js/dist/html2pdf.bundle.min.js"></script>
+    <script>
+        var ctxAttendees = document.getElementById('attendeesChart').getContext('2d');
+        var attendeesChart = new Chart(ctxAttendees, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Attendees',
+                    data: [1000, 2500, 3000, 2000, 4000, 5000, 6000],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        var ctxSales = document.getElementById('salesChart').getContext('2d');
+        var salesChart = new Chart(ctxSales, {
+            type: 'bar',
+            data: {
+                labels: ['Daily Sales', 'Weekly Sales', 'Monthly Sales', 'Yearly Sales'],
+                datasets: [{
+                    label: 'Sales (₱)',
+                    data: [5000, 35000, 150000, 1800000],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Forecasting button functionality
+        document.getElementById('forecastBtn').addEventListener('click', function () {
+            alert('Forecasting feature coming soon!');
+        });
+
+        // Generate PDF report
+        document.getElementById('generateReportBtn').addEventListener('click', function () {
+            var element = document.getElementById('reportContent');
+            html2pdf().from(element).set({
+                margin: 1,
+                filename: 'Analytics_Report.pdf',
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'in', format: 'letter', compressPDF: true }
+            }).save();
+        });
+    </script>
+}
+
+<!-- Custom Styles -->
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    h2, h4, h6 {
+        font-weight: 600;
+    }
+
+    /* KPI Cards Styling */
+    .kpi-card {
+        background: linear-gradient(135deg, #007bff, #00c6ff);
+        color: white;
+        border: none;
+        border-radius: 10px;
+    }
+
+    .kpi-title {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .kpi-icon {
+        font-size: 3rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Forecast Button Styling */
+    #forecastBtn {
+        font-weight: 600;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+    }
+
+    .table th {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .card {
+        border: none;
+        background-color: #f8f9fa;
+    }
+
+        .card h6 {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+</style>

@@ -1,0 +1,173 @@
+﻿@page
+@model Capstone.Pages.Staff.Staff_messagesModel
+@{
+    ViewData["Title"] = "Staff Messages";
+    Layout = "_StaffLayout";
+}
+
+<!-- Page Title -->
+<div class="row mb-4">
+    <div class="col">
+        <h2>Messages</h2>
+    </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="row g-0">
+    <!-- Inbox Section (Left side) -->
+    <div class="col-lg-4 border-end">
+        <div class="inbox-header d-flex justify-content-between align-items-center p-3">
+            <h3 class="text-primary mb-0">Inbox</h3>
+            <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#newMessageModal">
+                <i class="bi bi-plus-circle"></i> Compose
+            </button>
+        </div>
+        <div class="inbox-list list-group" style="max-height: 400px; overflow-y: auto;">
+            @if (Model.Conversations != null && Model.Conversations.Any())
+            {
+                foreach (var conversation in Model.Conversations)
+                {
+                    <a href="?conversationId=@conversation.Id"
+                       class="list-group-item list-group-item-action @(Model.SelectedConversationId == conversation.Id ? "active" : "")">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>@conversation.Sender</strong>
+                                <small class="d-block text-muted">@conversation.LastMessageSnippet</small>
+                            </div>
+                            <small class="text-muted">@conversation.LastMessageDate.ToString("MMM dd, yyyy")</small>
+                        </div>
+                    </a>
+                }
+            }
+            else
+            {
+                <p class="text-center text-muted">No conversations yet!</p>
+            }
+        </div>
+    </div>
+
+    <!-- Chat Section (Right side) -->
+    <div class="col-lg-8">
+        <div class="card messenger-container shadow-sm">
+            <!-- Chat Header with Menu Dropdown -->
+            <div class="card-header d-flex justify-content-between align-items-center p-3">
+                <h5 class="mb-0">@Model.SelectedConversation?.Sender Chat</h5>
+                <div class="dropdown">
+                    <button class="btn btn-link" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="#">Mute Notifications</a></li>
+                        <li><a class="dropdown-item" href="#">View Contact Details</a></li>
+                        <li><a class="dropdown-item text-danger" href="#">Delete Conversation</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="card-body p-0 chat-box">
+                @if (Model.SelectedConversation != null && Model.SelectedConversation.Messages.Any())
+                {
+                    foreach (var message in Model.SelectedConversation.Messages)
+                    {
+                        <div class="d-flex mb-3 @(message.Sender == "You" ? "justify-content-end" : "justify-content-start")">
+                            <div class="message-bubble @(message.Sender == "You" ? "bg-primary text-white" : "bg-light")">
+                                <p class="fw-bold">@message.Sender</p>
+                                <p>@message.Content</p>
+                                <small class="text-muted">@message.DateSent.ToString("MMMM dd, yyyy - h:mm tt")</small>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-center text-muted">Select a conversation to view messages</p>
+                }
+            </div>
+
+            <!-- Message Input Section -->
+            @if (Model.SelectedConversation != null)
+            {
+                <div class="input-box p-3">
+                    <form method="post" action="/Admin/Messages?conversationId=@Model.SelectedConversationId" class="d-flex">
+                        <input type="text" class="form-control shadow-none border-0 rounded-pill me-2" name="Content" placeholder="Type a message..." required />
+                        <button type="submit" class="btn btn-primary rounded-pill">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- New Message Modal -->
+<div class="modal fade" id="newMessageModal" tabindex="-1" aria-labelledby="newMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newMessageModalLabel">Compose a New Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/Admin/Messages">
+                    <div class="mb-3">
+                        <label for="recipient" class="form-label">Recipient</label>
+                        <input type="text" class="form-control rounded-pill" id="recipient" name="Recipient" placeholder="Enter recipient's name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageText" class="form-label">Message</label>
+                        <textarea class="form-control" id="messageText" name="MessageText" rows="3" placeholder="Type your message..." style="border-radius: 10px;" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .chat-box {
+        padding: 10px;
+        height: 30rem;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+    }
+
+    .message-bubble {
+        max-width: 60%;
+        padding: 10px 15px;
+        border-radius: 15px;
+    }
+
+        .message-bubble.bg-light {
+            background-color: #e9ecef;
+        }
+
+        .message-bubble.bg-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+    .input-box {
+        background-color: #f1f1f1;
+        border-top: 1px solid #ddd;
+    }
+
+    .form-control {
+        border-radius: 50px;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+    }
+
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+</style>
+
+<!-- Include Bootstrap JavaScript and Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

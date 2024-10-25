@@ -1,0 +1,109 @@
+/* General body styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar styling */
+#sidebar {
+    width: 250px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+    /* Sidebar brand/logo */
+    #sidebar .navbar-brand {
+        color: #007bff;
+        font-weight: bold;
+        font-size: 1.5rem;
+        display: block;
+        padding: 20px 15px;
+        text-align: center;
+    }
+
+        #sidebar .navbar-brand img {
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+    /* Sidebar navigation links */
+    #sidebar .nav-link {
+        font-family: inherit;
+        color: #333;
+        padding: 12px 20px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+        background-color: transparent;
+        text-decoration: none;
+    }
+
+        /* Active state for all sidebar links */
+        #sidebar .nav-link.active {
+            background-color: rgba(0, 123, 255, 0.2); /* Slightly darker blue background */
+            color: black !important; /* Force black color for active link */
+            box-shadow: inset 4px 0 0 black; /* Black left border for active state */
+            font-weight: bold;
+        }
+
+        /* Hover effect for sidebar links */
+        #sidebar .nav-link:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            box-shadow: inset 2px 0 0 #007bff;
+        }
+
+        /* Sidebar logout button */
+        #sidebar .nav-link.text-danger {
+            color: #e74c3c !important;
+        }
+
+            #sidebar .nav-link.text-danger:hover {
+                background-color: rgba(231, 76, 60, 0.1);
+                color: #e74c3c;
+            }
+
+/* Content styling */
+#content {
+    padding: 20px;
+    margin-left: 250px;
+    background-color: #f8f9fa;
+    transition: margin 0.3s ease;
+}
+
+/* Mobile view: sidebar toggle */
+@media (max-width: 768px) {
+    #sidebar {
+        left: -250px;
+        position: absolute;
+    }
+
+        #sidebar.active {
+            left: 0;
+        }
+
+    #sidebarToggle {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        cursor: pointer;
+    }
+
+    #content {
+        margin-left: 0;
+    }
+
+    #sidebar.active + #content {
+        margin-left: 250px;
+    }
+}
