@@ -21,8 +21,6 @@
         <h2>Dashboard - Fiesta Carnival</h2>
     </div>
 </div>
-
-<div class="container mt-4">
     <!-- Info Boxes -->
     <div class="row">
         <div class="col-md-4 mb-3">
@@ -61,7 +59,6 @@
             <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
                 <option value="">All</option>
                 <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
-                <option value="Charging" selected="@((Model.StatusFilter == "Charging") ? true : false)">Charging</option>
                 <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
             </select>
         </form>

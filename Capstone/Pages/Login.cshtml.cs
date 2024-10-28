@@ -1,40 +1,43 @@
+using Capstone.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Linq;
 
-public class LoginModel : PageModel
+namespace Capstone.Pages // Replace with your actual namespace
 {
-    [BindProperty]
-    public string Username { get; set; }
-
-    [BindProperty]
-    public string Password { get; set; }
-
-    public string ErrorMessage { get; set; }
-
-    public IActionResult OnPost()
+    public class LoginModel : PageModel
     {
-        // Staff credentials
-        const string staffUsername = "staff";
-        const string staffPassword = "staff123";
+        private readonly ApplicationDbContext _context;
 
-        // Admin credentials
-        const string adminUsername = "admin";
-        const string adminPassword = "admin123";
+        public LoginModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-        // Authentication Logic
-        if (Username == staffUsername && Password == staffPassword)
+        [BindProperty]
+        public string? Username { get; set; }
+
+        [BindProperty]
+        public string? Password { get; set; }
+
+        public string? ErrorMessage { get; set; }
+
+        public IActionResult OnPost()
         {
-            // Redirect to the staff dashboard
-            return RedirectToPage("/Staff/Staff-Dashboard");
-        }
-        else if (Username == adminUsername && Password == adminPassword)
-        {
-            // Redirect to the admin dashboard
-            return RedirectToPage("/Admin/Admin-Dashboard");
-        }
-        else
-        {
-            // If credentials are invalid, show an error message
+            var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
+
+            if (user != null)
+            {
+                if (user.Type == "Admin")
+                {
+                    return RedirectToPage("/Admin/Admin-Dashboard");
+                }
+                else if (user.Type == "Staff")
+                {
+                    return RedirectToPage("/Staff/Staff-Dashboard");
+                }
+            }
+
             ErrorMessage = "Invalid username or password";
             return Page();
         }

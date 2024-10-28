@@ -15,17 +15,16 @@
     </div>
 </div>
 
+<div class="container mt-4">
 <!-- Page Title -->
 <div class="row mb-4">
     <div class="col">
         <h2>Dashboard - Fiesta Carnival</h2>
     </div>
 </div>
-
-<div class="container mt-4">
     <!-- Info Boxes -->
     <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
@@ -34,7 +33,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-people-fill icon"></i>
                 <div class="info-text">
@@ -43,9 +42,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
-                <i class="bi bi-currency-dollar icon"></i>
+                <i class="bi bi-watch icon"></i>
                 <div class="info-text">
                     <h5>₱5988</h5>
                     <p>Total Sales</p>
@@ -61,7 +60,6 @@
             <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
                 <option value="">All</option>
                 <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
-                <option value="Charging" selected="@((Model.StatusFilter == "Charging") ? true : false)">Charging</option>
                 <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
             </select>
         </form>
@@ -72,7 +70,7 @@
         <div class="col-12">
             <div class="transaction-table">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover" id="transactionTable">
                         <thead class="table-primary">
                             <tr>
                                 <th>Transaction Number</th>
@@ -81,7 +79,8 @@
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
                                 <th>Status</th>
-                                <th>Battery</th>
+                                <th>Deactivation</th>
+                                @*<th>Battery</th>*@
                             </tr>
                         </thead>
                         <tbody>
@@ -94,11 +93,11 @@
                                     <td>@transaction.EndTime</td>
                                     <td>@transaction.RemainingTime</td>
                                     <td>
-                                        <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Charging" ? "bg-warning text-dark" : "bg-secondary")">
+                                        <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Offline" ? "bg-danger" : "bg-secondary")">
                                             @transaction.Status
                                         </span>
                                     </td>
-                                    <td>@transaction.Battery</td>
+                                    <td><span class="btn btn-deactivate bg-black text-white">Deactivate</span></td>
                                 </tr>
                             }
                         </tbody>
