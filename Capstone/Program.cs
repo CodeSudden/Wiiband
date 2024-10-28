@@ -18,7 +18,7 @@ builder.Services.AddControllersWithViews();
 
 // Configure database connection using the connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("WiijumpDatabase")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 // Add Stripe configuration and load it from appsettings.json or environment variables
