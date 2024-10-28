@@ -5,8 +5,7 @@ using Capstone.Hubs;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Capstone.Data;  // Ensure this is the correct namespace for your ApplicationDbContext
-using Capstone.Pages.Staff;
+using Capstone.Data;
 
 namespace Capstone.Pages.Staff
 {
@@ -42,6 +41,10 @@ namespace Capstone.Pages.Staff
         [BindProperty]
         public bool DiscountPWD { get; set; }
 
+        [BindProperty]
+        [Range(0, int.MaxValue, ErrorMessage = "Please enter a valid number of discounts.")]
+        public int NumberOfDiscounts { get; set; } = 0;
+
         public decimal TotalAmount { get; set; }
 
         // Automatically generate the transaction number in the server-side code
@@ -55,7 +58,8 @@ namespace Capstone.Pages.Staff
             // Generate a unique transaction number
             string transactionNumber = GenerateTransactionNumber();
 
-            TotalAmount = CalculateTotalAmount(NumberOfJumpers, SelectedPromo, DiscountPWD);
+            // Calculate the total amount with the number of discounts and other parameters
+            TotalAmount = CalculateTotalAmount(NumberOfJumpers, SelectedPromo, NumberOfDiscounts, DiscountPWD);
 
             // Create a new Customer object with the registration data
             var customer = new Customer
@@ -67,8 +71,6 @@ namespace Capstone.Pages.Staff
                 TotalAmount = TotalAmount,
                 TransactionNumber = transactionNumber,
             };
-
-           
 
             // Notify the dashboard about the new registration using SignalR
             await _hubContext.Clients.All.SendAsync("ReceiveRegistrationUpdate", new
@@ -88,7 +90,8 @@ namespace Capstone.Pages.Staff
             return "TRN-" + DateTime.Now.Ticks.ToString(); // Example: TRN-637123456789012345
         }
 
-        private decimal CalculateTotalAmount(int numberOfJumpers, string selectedPromo, bool discountPWD)
+        // Calculate the total amount considering discounts
+        private decimal CalculateTotalAmount(int numberOfJumpers, string selectedPromo, int numberOfDiscounts, bool discountPWD)
         {
             var promoRates = new Dictionary<string, decimal>
             {
@@ -102,9 +105,17 @@ namespace Capstone.Pages.Staff
             decimal promoRate = promoRates.ContainsKey(selectedPromo) ? promoRates[selectedPromo] : 0;
             decimal totalAmount = numberOfJumpers * promoRate;
 
-            if (selectedPromo != "open" && discountPWD)
+            // Apply discounts based on the number of jumpers and number of discounts
+            if (selectedPromo != "open")
             {
-                totalAmount -= promoRate * 0.2m;
+                int maxDiscounts = Math.Min(numberOfDiscounts, numberOfJumpers); // Cap the discounts to the number of jumpers
+                decimal discountAmount = promoRate * 0.2m * maxDiscounts;
+                totalAmount -= discountAmount;
+
+                if (discountPWD)
+                {
+                    totalAmount -= promoRate * 0.2m; // Apply PWD discount
+                }
             }
 
             return totalAmount;

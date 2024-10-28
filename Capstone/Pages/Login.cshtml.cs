@@ -1,42 +1,51 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-public class LoginModel : PageModel
+namespace Capstone.Pages // Ensure this namespace matches your project structure
 {
-    [BindProperty]
-    public string Username { get; set; }
-
-    [BindProperty]
-    public string Password { get; set; }
-
-    public string ErrorMessage { get; set; }
-
-    public IActionResult OnPost()
+    public class LoginModel : PageModel
     {
-        // Staff credentials
-        const string staffUsername = "staff";
-        const string staffPassword = "staff123";
+        [BindProperty]
+        public string Username { get; set; }
 
-        // Admin credentials
-        const string adminUsername = "admin";
-        const string adminPassword = "admin123";
+        [BindProperty]
+        public string Password { get; set; }
 
-        // Authentication Logic
-        if (Username == staffUsername && Password == staffPassword)
+        public string ErrorMessage { get; set; }
+
+        public IActionResult OnPost() // This method must have a return type
         {
-            // Redirect to the staff dashboard
-            return RedirectToPage("/Staff/Staff-Dashboard");
-        }
-        else if (Username == adminUsername && Password == adminPassword)
-        {
-            // Redirect to the admin dashboard
-            return RedirectToPage("/Admin/Admin-Dashboard");
-        }
-        else
-        {
-            // If credentials are invalid, show an error message
-            ErrorMessage = "Invalid username or password";
-            return Page();
+            // Staff credentials
+            const string staffUsername = "staff";
+            const string staffPassword = "staff123";
+
+            // Admin credentials
+            const string adminUsername = "admin";
+            const string adminPassword = "admin123";
+
+            // Authentication Logic
+            if (Username == staffUsername && Password == staffPassword)
+            {
+                // Store the login success flag and redirect URL in TempData
+                TempData["LoginSuccess"] = true;
+                TempData["RedirectUrl"] = Url.Page("/Staff/Staff-Dashboard");
+
+                return RedirectToPage(); // Correct return type
+            }
+            else if (Username == adminUsername && Password == adminPassword)
+            {
+                // Store the login success flag and redirect URL in TempData
+                TempData["LoginSuccess"] = true;
+                TempData["RedirectUrl"] = Url.Page("/Admin/Admin-Dashboard");
+
+                return RedirectToPage(); // Correct return type
+            }
+            else
+            {
+                // If credentials are invalid, show an error message
+                ErrorMessage = "Invalid username or password";
+                return Page(); // Correct return type
+            }
         }
     }
 }
