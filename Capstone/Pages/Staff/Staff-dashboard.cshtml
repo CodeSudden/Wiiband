@@ -15,15 +15,16 @@
     </div>
 </div>
 
-<!-- Page Title -->
-<div class="row mb-4">
-    <div class="col">
-        <h2>Dashboard - Fiesta Carnival</h2>
+<div class="container mt-4">
+    <!-- Page Title -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Dashboard - Fiesta Carnival</h2>
+        </div>
     </div>
-</div>
     <!-- Info Boxes -->
     <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
@@ -32,7 +33,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-people-fill icon"></i>
                 <div class="info-text">
@@ -41,9 +42,18 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
-                <i class="bi bi-currency-dollar icon"></i>
+                <i class="bi bi-watch icon"></i>
+                <div class="info-text">
+                    <h5>9</h5>
+                    <p>Active now</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-cash-stack icon"></i>
                 <div class="info-text">
                     <h5>₱5988</h5>
                     <p>Total Sales</p>
@@ -78,7 +88,8 @@
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
                                 <th>Status</th>
-                                <th>Battery</th>
+                                <th>Deactivation</th>
+                                @*<th>Battery</th>*@
                             </tr>
                         </thead>
                         <tbody>
@@ -91,11 +102,11 @@
                                             <td>@transaction.EndTime</td>
                                             <td>@transaction.RemainingTime</td>
                                             <td>
-                                                <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Charging" ? "bg-warning text-dark" : "bg-secondary")">
+                                                <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Offline" ? "bg-danger" : "bg-secondary")">
                                             @transaction.Status
                                                 </span>
                                             </td>
-                                            <td>@transaction.Battery</td>
+                                            <td><span class="btn btn-deactivate bg-black text-white">Deactivate</span></td>
                                         </tr>
                             }
                         </tbody>
@@ -129,7 +140,7 @@ connection.on("ReceiveRegistrationUpdate", function (data) {
         <td>${data.EndTime || 'N/A'}</td>
         <td>${data.RemainingTime || 'N/A'}</td>
         <td>
-            <span class="badge ${data.Status === 'Online' ? 'bg-success' : data.Status === 'Charging' ? 'bg-warning text-dark' : 'bg-secondary'}">
+            <span class="badge ${data.Status === 'Active' ? 'bg-success' : data.Status === 'Inactive' ? 'bg-danger' : 'bg-secondary'}">
                 ${data.Status}
             </span>
         </td>
@@ -164,6 +175,13 @@ connection.on("ReceiveRegistrationUpdate", function (data) {
         font-weight: 700;
         color: #212529;
         margin-bottom: 0.5rem;
+    }
+
+    .btn-deactivate {
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 4px 11px;
     }
 
     .btn-download {

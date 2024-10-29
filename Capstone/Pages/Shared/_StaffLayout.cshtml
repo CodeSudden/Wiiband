@@ -57,8 +57,17 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a asp-page="/Auth/Logout" class="nav-link text-danger d-flex align-items-center">
+                        <a asp-page="/Logout" class="nav-link text-danger d-flex align-items-center">
                             <i class="bi bi-box-arrow-left me-3"></i> Logout
+                        </a>
+                    </li>
+                    <li class="nav-item fixed-bottom">
+                        <a asp-page="" class="nav-link d-flex align-items-center @((ViewContext.RouteData.Values["page"].ToString() == "") ? "active" : "")">
+                            <img src="~/img/sample_staff.png" alt="Profile Picture" height="40" width="40" class="rounded-circle me-2 border-image">
+                            <div class="d-flex flex-column ms-2">
+                                <span class="fw-bold">Ian</span>
+                                <span class="text-muted smaller-text">Staff</span>
+                            </div>
                         </a>
                     </li>
                 </ul>
@@ -76,3 +85,20 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+<style>
+    .border-image {
+        border: 3px solid #007bff;
+    }
+
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        width: 18.3%;
+        padding: 10px; /* Adjust padding as needed */
+    }
+
+    .smaller-text {
+        font-size: 13px;
+    }
+</style>
