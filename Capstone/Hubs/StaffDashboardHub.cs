@@ -1,23 +1,15 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
+using Capstone.Models;  // Assuming Dashboard is in the Models namespace
 
 namespace Capstone.Hubs
 {
     public class StaffDashboardHub : Hub
     {
-        // Method to receive registration completion and broadcast to all clients
-        public async Task CompleteRegistration(RegistrationData data)
+        // Method to broadcast the Dashboard entry (or any object you want to send)
+        public async Task SendRegistrationUpdate(Dashboard dashboardEntry)
         {
-            // Send this data to all connected clients (the dashboard)
-            await Clients.All.SendAsync("ReceiveRegistrationUpdate", data);
+            await Clients.All.SendAsync("ReceiveRegistrationUpdate", dashboardEntry);
         }
-    }
-
-    // Helper class to store registration data
-    public class RegistrationData
-    {
-        public string CustomerName { get; set; }
-        public int NumberOfJumpers { get; set; }
-        public string TotalAmount { get; set; }
     }
 }

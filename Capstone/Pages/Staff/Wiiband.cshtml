@@ -22,7 +22,7 @@
                 </div>
                 <div class="mb-4">
                     <label asp-for="Email" class="form-label">Email</label>
-                    <input type="email" asp-for="Email" class="form-control rounded-pill" required />
+                    <input type="text" asp-for="Email" class="form-control rounded-pill" required />
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="mb-4">
@@ -61,7 +61,7 @@
                 <!-- Total Amount -->
                 <div class="mb-4">
                     <label for="TotalAmount" class="form-label">Total Amount</label>
-                    <input type="text" id="TotalAmount" class="form-control rounded-pill" readonly value="@Model.TotalAmount" />
+                    <input type="" id="TotalAmount" class="form-control rounded-pill" readonly value="@Model.TotalAmount" />
                 </div>
 
                 <!-- Waiver Form Modal Trigger -->
@@ -70,7 +70,7 @@
                 </button>
 
                 <!-- Register Button -->
-                <button type="button" class="btn btn-primary rounded-pill w-100" id="registerBtn" disabled onclick="openScannerModal()">Register</button>
+                <button type="submit" class="btn btn-primary rounded-pill w-100" id="registerBtn" disabled onclick="openScannerModal()">Register</button>
             </form>
         </div>
     </div>
@@ -111,7 +111,7 @@
 </div>
 
 
-<!-- Scanner Modal -->
+<!-- Scanner Modal 
 <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-3 p-4">
@@ -123,7 +123,7 @@
         </div>
     </div>
 </div>
-
+-->
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
@@ -181,27 +181,27 @@
 
     calculateTotal(); // Initial calculation
 
-    function openScannerModal() {
-        remainingScans = parseInt(document.getElementById('NumberOfJumpers').value);
-        document.getElementById('remainingScans').textContent = remainingScans;
-        const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
-        scannerModal.show();
-    }
+  //  function openScannerModal() {
+   //     remainingScans = parseInt(document.getElementById('NumberOfJumpers').value);
+    //   document.getElementById('remainingScans').textContent = remainingScans;
+    // const scannerModal = new bootstrap.Modal(document.getElementById('scannerModal'));
+          //  scannerModal.show();
+    //}
 
-    function scanRFID() {
-        if (remainingScans > 0) {
-            remainingScans--;
-            document.getElementById('remainingScans').textContent = remainingScans;
-            if (remainingScans === 0) {
-                alert("All RFIDs scanned. Transaction complete!");
-                completeRegistration(); // Call the registration completion function
-                document.getElementById("registrationForm").reset();
-                const scannerModal = bootstrap.Modal.getInstance(document.getElementById('scannerModal'));
-                scannerModal.hide();
-                window.location.href = "/Staff/Staff-dashboard"; // Redirect to the dashboard
-            }
-        }
-    }
+    //function scanRFID() {
+    //  if (remainingScans > 0) {
+      //      remainingScans--;
+        //    document.getElementById('remainingScans').textContent = remainingScans;
+          ////  if (remainingScans === 0) {
+    //  alert("All RFIDs scanned. Transaction complete!");
+           //     completeRegistration(); // Call the registration completion function
+             //   document.getElementById("registrationForm").reset();
+    // const scannerModal = bootstrap.Modal.getInstance(document.getElementById('scannerModal'));
+    // scannerModal.hide();
+                    //window.location.href = "/Staff/Staff-dashboard"; // Redirect to the dashboard
+              //  }
+          //  }
+    //   }
 
     // Complete registration and send data to the server using SignalR
     function completeRegistration() {
@@ -210,16 +210,6 @@
         const totalAmount = document.getElementById('TotalAmount').value;
 
         const transactionNumber = generateTransactionNumber();
-
-        // Send the registration data to the SignalR hub
-        connection.invoke("CompleteRegistration", {
-            CustomerName: customerName,
-            NumberOfJumpers: numberOfJumpers,
-            TotalAmount: totalAmount,
-            TransactionNumber: transactionNumber
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
     }
 
     // Function to generate a transaction number

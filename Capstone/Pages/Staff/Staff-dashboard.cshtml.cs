@@ -1,3 +1,5 @@
+using Capstone.Data;
+using Capstone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
@@ -14,8 +16,17 @@ namespace Capstone.Pages.Staff
         public void OnGet()
         {
             // Simulate getting data from the database
-            Transactions = GetAllTransactions();
+            DashboardEntries = _context.Dashboard.ToList();
         }
+
+        private readonly ApplicationDbContext _context;
+
+        public Staff_dashboardModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public List<Dashboard> DashboardEntries { get; set; }
 
         public void OnPost()
         {

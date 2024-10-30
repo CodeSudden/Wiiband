@@ -1,0 +1,81 @@
+﻿@page
+@model Capstone.Pages.Admin.Addons.DeactivateConfirmationModel
+@{
+    ViewData["Title"] = "Confirm Deactivation";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm p-4 border-0 rounded-4" style="max-width: 480px; margin: auto;">
+        <div class="card-body text-center">
+            <h3 class="card-title mb-3 text-danger fw-bold">Deactivate Transaction</h3>
+            <p class="fs-5 text-muted">
+                You are about to deactivate the transaction
+                <strong class="text-dark">@Model.TransactionNumber</strong>. This action cannot be undone.
+            </p>
+
+            <div class="mt-4 d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a asp-page="/Admin/Admin_Dashboard" class="btn btn-light border px-4 py-2 shadow-sm" style="min-width: 100px;">
+                    Cancel
+                </a>
+                <form method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger px-4 py-2 shadow-sm" style="min-width: 150px;">
+                        Confirm Deactivation
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Styling for Better Design -->
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background-color: #f9f9f9;
+    }
+
+    .card {
+        background-color: #fff;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.75rem;
+        color: #dc3545;
+    }
+
+    .btn {
+        font-size: 1.1rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        color: #6c757d;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    .text-dark {
+        color: #212529;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+</style>

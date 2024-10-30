@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using Capstone.Models;
 
 namespace Capstone.Data
 {
@@ -15,6 +16,9 @@ namespace Capstone.Data
         public DbSet<Staff> Staff { get; set; }
         public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Dashboard> Dashboard { get; set; }
+        public DbSet<Registration> Registrations { get; set; }  // Add this line
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
