@@ -5,14 +5,12 @@
     Layout = "_StaffLayout";
     @using Newtonsoft.Json;
 
-    // Serialize the upcoming events to JSON to pass to the FullCalendar
+    //Serialize the upcoming events to JSON to pass to the FullCalendar
     var calendarEventsJson = JsonConvert.SerializeObject(Model.UpcomingEvents.Select(e => new
     {
         title = e.Name,
         start = e.Date.ToString("yyyy-MM-dd"),  // FullCalendar expects the date format as yyyy-MM-dd
         end = e.Date.AddDays(1).ToString("yyyy-MM-dd"),  // Assuming the event is a one-day event, adjust as needed
-        description = e.Description,
-        attendees = e.Attendees
     }));
 }
 
@@ -24,7 +22,7 @@
     <!-- Calendar Section with New Event Button -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="text-primary mb-0">Event Calendar</h2>
-        <button type="button" class="btn btn-primary" id="openEventModal">
+        <button type="button" class="btn btn-primary" id="openEventModal" data-bs-toggle="modal" data-bs-target="#eventModal">
             + New Event
         </button>
     </div>
@@ -57,10 +55,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>Event Name</th>
+                            <th>Email</th>
                             <th>Date</th>
-                            <th>Location</th>
-                            <th>Attendees</th>
-                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Jumpers</th>
+                            <th>Duration</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,14 +67,11 @@
                         {
                             <tr class="event-row" data-date="@upcomingEvent.Date.ToString("yyyy-MM-dd")">
                                 <td>@upcomingEvent.Name</td>
+                                <td>@upcomingEvent.Email</td>
                                 <td>@upcomingEvent.Date.ToString("MMMM dd, yyyy")</td>
-                                <td>@upcomingEvent.Location</td>
-                                <td>@upcomingEvent.Attendees</td>
-                                <td>
-                                    <span class="badge bg-@(@upcomingEvent.IsConfirmed ? "success" : "warning")">
-                                        @(@upcomingEvent.IsConfirmed ? "Confirmed" : "Pending")
-                                    </span>
-                                </td>
+                                <td>@upcomingEvent.Time</td>
+                                <td>@upcomingEvent.Jumpers Persons</td>
+                                <td>@upcomingEvent.Duration hrs</td>
                             </tr>
                         }
                     </tbody>
@@ -94,38 +90,38 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form method="post" id="customPackageForm" onsubmit="openContractModal(event)">
+                <form method="post" id="customPackageForm">
                     <!-- Customer Information -->
                     <h6>Customer Information</h6>
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" name="CustomerName" class="form-control rounded-pill" required />
+                        <input type="text" asp-for="Name" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" name="CustomerEmail" class="form-control rounded-pill" required />
+                        <input type="email" asp-for="Email" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" name="CustomerPhone" class="form-control rounded-pill" required />
+                        <input type="tel" asp-for="Phone" class="form-control rounded-pill" required />
                     </div>
 
                     <!-- Event Date and Time -->
                     <h6>Event Date and Time</h6>
                     <div class="mb-3">
                         <label class="form-label">Event Date</label>
-                        <input type="date" name="EventDate" class="form-control rounded-pill" required />
+                        <input type="date" asp-for="Date" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Event Time</label>
-                        <input type="time" name="EventTime" class="form-control rounded-pill" required />
+                        <input type="time" asp-for="Time" class="form-control rounded-pill" required />
                     </div>
 
                     <!-- Jumping Package -->
                     <h6>Jumping Package</h6>
                     <div class="mb-3">
                         <label class="form-label">Time</label>
-                        <select name="JumpTime" class="form-select rounded-pill">
+                        <select asp-for="Duration" class="form-select rounded-pill">
                             <option value="1">1 Hour</option>
                             <option value="2">2 Hours</option>
                             <option value="3">3 Hours</option>
@@ -133,51 +129,51 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Jumpers</label>
-                        <input type="number" name="NumberOfJumpers" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Jumpers" class="form-control rounded-pill" min="1" required />
                         <small>₱499/head</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Socks</label>
-                        <input type="number" name="NumberOfSocks" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Socks" class="form-control rounded-pill" min="1" required />
                     </div>
 
                     <!-- Add-ons -->
                     <h6>Add-ons</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="EInvitation" id="eInvitation">
+                        <input class="form-check-input" type="checkbox" asp-for="Addons" value="E-Invitation" id="eInvitation">
                         <label class="form-check-label" for="eInvitation">E-Invitation</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="GameCoach" id="gameCoach">
+                        <input class="form-check-input" asp-for="Addons" value="GameCoach" type="checkbox" id="gameCoach">
                         <label class="form-check-label" for="gameCoach">2 Game Coach</label>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Trampoline Games (How many?)</label>
-                        <input type="number" name="TrampolineGames" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="TrampolineGames" class="form-control rounded-pill" min="1" required />
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="WaterBottle" id="waterBottle">
+                        <input class="form-check-input" asp-for="Addons" value="WaterBottle" type="checkbox" id="waterBottle">
                         <label class="form-check-label" for="waterBottle">Water Bottle</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="MelonaIceCream" id="melonaIceCream">
+                        <input class="form-check-input" asp-for="Addons" value="MelonaIC" type="checkbox" id="melonaIceCream">
                         <label class="form-check-label" for="melonaIceCream">Melona Ice Cream</label>
                     </div>
 
                     <!-- Party Area -->
                     <h6>Party Area</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="PartyArea" id="partyArea" onchange="togglePartyAreaDetails(this)">
+                        <input class="form-check-input" type="checkbox" id="partyArea" onchange="togglePartyAreaDetails(this)">
                         <label class="form-check-label" for="partyArea">Party Area</label>
                     </div>
                     <div id="partyAreaDetails" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">How many guests?</label>
-                            <input type="number" name="PartyGuests" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyGuest"class="form-control rounded-pill" min="1" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">How many hours?</label>
-                            <input type="number" name="PartyHours" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyHours" class="form-control rounded-pill" min="1" />
                         </div>
                         <small>Includes: Tables, Chairs, Tablecloth, Sound System</small>
                     </div>
@@ -185,26 +181,26 @@
                     <!-- Party Decorations -->
                     <h6>Party Decorations</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="PartyDecorations" id="partyDecorations" onchange="toggleDecorationOptions(this)">
+                        <input class="form-check-input" type="checkbox" id="partyDecorations" onchange="toggleDecorationOptions(this)">
                         <label class="form-check-label" for="partyDecorations">Party Decorations</label>
                     </div>
                     <div id="decorationOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Choose a package</label>
-                            <select name="DecorationPackage" class="form-select rounded-pill">
+                            <select asp-for="PartyDecorations" name="DecorationPackage" class="form-select rounded-pill">
                                 <option value="HalfDeck">Half Deck - ₱8,000</option>
                                 <option value="WholeDeck">Whole Deck - ₱15,000</option>
                                 <option value="Premium">Premium - ₱25,000</option>
                             </select>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="FoodCart" id="foodCart" onchange="toggleFoodCart(this)">
+                            <input class="form-check-input" type="checkbox" id="foodCart" onchange="toggleFoodCart(this)">
                             <label class="form-check-label" for="foodCart">Include a food cart?</label>
                         </div>
                         <div id="foodCartOptions" style="display: none;">
                             <div class="mb-3">
                                 <label class="form-label">Electricity Charge per food cart</label>
-                                <input type="number" name="ElectricityCharge" class="form-control rounded-pill" value="1000" readonly />
+                                <input type="number" asp-for="ElecFoodCart" class="form-control rounded-pill" value="1000" readonly />
                             </div>
                         </div>
                     </div>
@@ -218,11 +214,11 @@
                     <div id="equipmentOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Chafing Dish (₱500/pc)</label>
-                            <input type="number" name="ChafingDish" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyEquipCD" class="form-control rounded-pill" min="1" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Plates, Glass, Spoon & Fork (₱100 per person)</label>
-                            <input type="number" name="PartyUtensils" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyEquipUtils" class="form-control rounded-pill" min="1" />
                         </div>
                     </div>
 
@@ -269,7 +265,7 @@
         const calendarEl = document.getElementById('eventCalendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: @Html.Raw(calendarEventsJson),  // Load events from the backend
+            events: @Html.Raw(calendarEventsJson),
             // Handle date click to show events for that date
             dateClick: function (info) {
                 const clickedDate = info.dateStr;
@@ -282,12 +278,6 @@
             }
         });
         calendar.render();
-
-        // Show the event creation modal when "+ New Event" is clicked
-        document.getElementById('openEventModal').addEventListener('click', function () {
-            const bookingModal = new bootstrap.Modal(document.getElementById('eventModal'));
-            bookingModal.show();
-        });
 
         // Filter logic
         const filterOptions = document.querySelectorAll('.filter-option');
@@ -344,14 +334,6 @@
         }
     }
 
-    function openContractModal(event) {
-        event.preventDefault();
-        const bookingModal = new bootstrap.Modal(document.getElementById('contractModal'));
-        bookingModal.show();
-    }
-
- 
-
     // Function to populate the event details modal with events for the clicked date
     function populateEventDetailsModal(events, clickedDate) {
         const modalBody = document.getElementById('eventDetailsModalBody');
@@ -383,12 +365,6 @@
         } else {
             modalBody.innerHTML = '<p>No events scheduled for this day.</p>';
         }
-    }
-
-    function openContractModal(event) {
-        event.preventDefault();
-        const bookingModal = new bootstrap.Modal(document.getElementById('contractModal'));
-        bookingModal.show();
     }
 
     function togglePartyAreaDetails(checkbox) {

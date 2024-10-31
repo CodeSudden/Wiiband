@@ -4,26 +4,33 @@ using Microsoft.EntityFrameworkCore;
 using Capstone.Data;  // Ensure this is the correct namespace for your ApplicationDbContext
 using Capstone.Pages.Staff;
 using Microsoft.Data.SqlClient;
+using System.Text.RegularExpressions;
 
 namespace Capstone.Pages.Staff
 {
-    public class WiibandModel : PageModel
+    public class Staff_WiibandModel : PageModel
     {
         private readonly IConfiguration _configuration;
 
-        public WiibandModel(IConfiguration configuration)
+        public Staff_WiibandModel(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
         [BindProperty]
         public string? CustomerName { get; set; }
+        [BindProperty]
         public string? Email { get; set; }
+        [BindProperty]
         public int NumberOfJumpers { get; set; }
+        [BindProperty]
         public int SelectedPromo { get; set; }
+        [BindProperty]
         public bool DiscountPWD { get; set; }
+        [BindProperty]
         public int TotalAmount { get; set; }
-        public string? Waiver {  get; set; }
+        [BindProperty]
+        public string? SignatureData { get; set; }
 
         public void OnGet()
         {
@@ -43,10 +50,13 @@ namespace Capstone.Pages.Staff
                 return Page();
             }
 
+            // Process the signature data (remove base64 prefix if it exists)
+            string base64Signature = Regex.Replace(SignatureData ?? "", @"^data:image\/[a-z]+;base64,", string.Empty);
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string sql = "INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, Waiver) " +
-                             "VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @Waiver)";
+                string sql = "INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, SignatureData) " +
+                             "VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @SignatureData)";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
@@ -56,15 +66,16 @@ namespace Capstone.Pages.Staff
                     command.Parameters.AddWithValue("@Promo", SelectedPromo);
                     command.Parameters.AddWithValue("@Discount", DiscountPWD);
                     command.Parameters.AddWithValue("@Total_amount", TotalAmount);
-                    command.Parameters.AddWithValue("@Waiver", Waiver ?? string.Empty);
+                    command.Parameters.AddWithValue("@SignatureData", base64Signature);
 
                     connection.Open();
                     command.ExecuteNonQuery();
                 }
             }
 
-            return RedirectToPage("Success"); // Redirect to a success page
+            return RedirectToPage("dashboard");
         }
+
     }
 
 }

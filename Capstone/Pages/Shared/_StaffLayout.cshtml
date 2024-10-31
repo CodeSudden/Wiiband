@@ -17,6 +17,10 @@
     <!-- jQuery (required for FullCalendar) -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
+    <!-- Signature pad-->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+
+
     <!-- Custom styles -->
     <link href="~/css/site.css" rel="stylesheet" />
 </head>
@@ -37,7 +41,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a asp-page="/Staff/Wiiband" class="nav-link d-flex align-items-center @((ViewContext.RouteData.Values["page"].ToString() == "/Staff/Wiiband") ? "active" : "")">
+                        <a asp-page="/Staff/Staff-Wiiband" class="nav-link d-flex align-items-center @((ViewContext.RouteData.Values["page"].ToString() == "/Staff/Staff-Wiiband") ? "active" : "")">
                             <i class="bi bi-graph-up me-3"></i> WiiBand
                         </a>
                     </li>

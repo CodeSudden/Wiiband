@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,70 +9,128 @@ namespace Capstone.Pages.Staff
 {
     public class StaffEventModel : PageModel
     {
-        public List<EventModel> UpcomingEvents { get; set; }
+        private readonly IConfiguration _configuration;
 
-        public string CalendarEventsJson { get; set; }
+        public StaffEventModel(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        [BindProperty]
+        public string? Name { get; set; }
+        [BindProperty]
+        public string? Email { get; set; }
+        [BindProperty]
+        public int Phone { get; set; }
+        [BindProperty]
+        public DateOnly Date { get; set; }
+        [BindProperty]
+        public TimeOnly Time { get; set; }
+        [BindProperty]
+        public int Duration { get; set; }
+        [BindProperty]
+        public int Jumpers { get; set; }
+        [BindProperty]
+        public int Socks { get; set; }
+        public string? Addons { get; set; }
+        public int TrampolineGames { get; set; }
+        public int PartyGuest { get; set; }
+        public int PartyHours { get; set; }
+        public int PartyDecorations { get; set; }
+        public int ElecFoodCart { get; set; }
+        public int PartyEquipCD { get; set; }
+        public int PartyEquipUtils { get; set; }
+        public DateTime Created_at { get; set; }
+
+        public List<EventModel> UpcomingEvents { get; set; }
+        public string? CalendarEventsJson { get; set; }
+
+        public class EventModel
+        {
+            public string? Name { get; set; }
+            public string? Email { get; set; }
+            public DateTime Date { get; set; }
+            public TimeSpan Time { get; set; }
+            public int Duration { get; set; }
+            public int Jumpers { get; set; }
+        }
 
         public void OnGet()
         {
-            // Initialize the upcoming events
-            UpcomingEvents = new List<EventModel>
+            UpcomingEvents = new List<EventModel>();
+            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                 new EventModel
+                string query = @"SELECT Name, Email, Date, Time, Duration, Jumpers FROM Events";
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    Name = "birthday",
-                    Date = new DateTime(2024, 10, 17),
-                    Location = "Fiesta carnival",
-                    Attendees = 12,
-                    IsConfirmed = true
-                },
-                new EventModel
-                {
-                    Name = "Anica's birthday",
-                    Date = new DateTime(2024, 10, 22),
-                    Location = "Fiesta carnival",
-                    Attendees = 25,
-                    IsConfirmed = false
-                },
-                 new EventModel
-                {
-                    Name = "Nothing's event",
-                    Date = new DateTime(2024, 10, 10),
-                    Location = "Venice",
-                    Attendees = 10,
-                    IsConfirmed = true
-                },
-                new EventModel
-                {
-                    Name = "Team Building",
-                    Date = new DateTime(2024, 10, 27),
-                    Location = "Venice",
-                    Attendees = 20,
-                    IsConfirmed = false
-                },
-                new EventModel
-                {
-                    Name = "Group bonding",
-                    Date = new DateTime(2024, 10, 29),
-                    Location = "Fiesta carnival",
-                    Attendees = 15,
-                    IsConfirmed = false
+                    connection.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            UpcomingEvents.Add(new EventModel
+                            {
+                                Name = reader["Name"].ToString(),
+                                Email = reader["Email"].ToString(),
+                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
+                                Time = (TimeSpan)reader["Time"],
+                                Duration = (int)reader["Duration"],
+                                Jumpers = (int)reader["Jumpers"]
+                            });
+                        }
+                    }
                 }
-            };
+            }
 
             // Convert to JSON for FullCalendar
             CalendarEventsJson = JsonConvert.SerializeObject(UpcomingEvents);
         }
-    }
 
-    public class EventModel
-    {
-        public string Name { get; set; }
-        public DateTime Date { get; set; }
-        public string Location { get; set; }
-        public int Attendees { get; set; }
-        public bool IsConfirmed { get; set; }
+        public IActionResult OnPost()
+        {
+            string? connectionString = _configuration.GetConnectionString("DefaultConnection");
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                ModelState.AddModelError(string.Empty, "Database connection string is missing.");
+                return Page();
+            }
 
-        public string Description { get; set; }
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = @"INSERT INTO Events 
+                            (Name, Email, Phone, Date, Time, Duration, Jumpers, Socks, Addons, TrampolineGames,
+                             PartyGuest, PartyHours, PartyDecorations, ElecFoodCart, PartyEquipCD, PartyEquipUtils, Created_at)
+                             VALUES (@Name, @Email, @Phone, @Date, @Time, @Duration, @Jumpers, @Socks, @Addons, @TrampolineGames,
+                             @PartyGuest, @PartyHours, @PartyDecorations, @ElecFoodCart, @PartyEquipCD, @PartyEquipUtils, @Created_at)";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Name", Name);
+                    command.Parameters.AddWithValue("@Email", Email);
+                    command.Parameters.AddWithValue("@Phone", Phone);
+                    command.Parameters.AddWithValue("@Date", Date == DateOnly.MinValue ? (object)DBNull.Value : Date);
+                    command.Parameters.AddWithValue("@Time", Time == TimeOnly.MinValue ? (object)DBNull.Value : Time);
+                    command.Parameters.AddWithValue("@Duration", Duration);
+                    command.Parameters.AddWithValue("@Jumpers", Jumpers);
+                    command.Parameters.AddWithValue("@Socks", Socks);
+                    command.Parameters.AddWithValue("@Addons", Addons ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@TrampolineGames", TrampolineGames);
+                    command.Parameters.AddWithValue("@PartyGuest", PartyGuest);
+                    command.Parameters.AddWithValue("@PartyHours", PartyHours);
+                    command.Parameters.AddWithValue("@PartyDecorations", PartyDecorations);
+                    command.Parameters.AddWithValue("@ElecFoodCart", ElecFoodCart);
+                    command.Parameters.AddWithValue("@PartyEquipCD", PartyEquipCD);
+                    command.Parameters.AddWithValue("@PartyEquipUtils", PartyEquipUtils);
+                    command.Parameters.AddWithValue("@Created_at", DateTime.Now);
+
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            return RedirectToPage("Success");
+        }
     }
 }
