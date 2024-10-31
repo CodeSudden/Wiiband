@@ -1,0 +1,276 @@
+﻿@page
+@model Capstone.Pages.Staff.Staff_WiibandModel
+@{
+    ViewData["Title"] = "WiiBand Jump Registration";
+    Layout = "_StaffLayout";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<div class="container mt-5">
+    <div class="card shadow-sm form-container rounded-4">
+        <div class="card-body p-4">
+            <h1 class="text-center mb-4">Customer</h1>
+            <form method="post" id="registrationForm">
+                <!-- Customer Information -->
+                <div class="mb-4">
+                    <label asp-for="CustomerName" class="form-label">Customer Name</label>
+                    <input type="text" asp-for="CustomerName" class="form-control rounded-pill" required />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input type="email" asp-for="Email" class="form-control rounded-pill" required />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="NumberOfJumpers" class="form-label">Number of Jumpers</label>
+                    <input type="number" asp-for="NumberOfJumpers" class="form-control rounded-pill" min="1" required />
+                    <span asp-validation-for="NumberOfJumpers" class="text-danger"></span>
+                </div>
+
+                <!-- Promo Options -->
+                <div class="mb-4">
+                    <label asp-for="SelectedPromo" class="form-label">Promo</label>
+                    <select asp-for="SelectedPromo" class="form-select rounded-pill" id="SelectedPromo" required>
+                        <option value="499">1 Hour Admission - ₱499/hr</option>
+                        <option value="399">Extended Hour - ₱399/hr</option>
+                        <option value="399">Early Jump (10am-12nn) - ₱399/hr</option>
+                        <option value="3990">10 Hours Multipass - ₱3990</option>
+                        <option value="7485">20 Hours Multipass - ₱7485</option>
+                        <option value="open">Open Time for Multipass (No Charge)</option>
+                    </select>
+                    <span asp-validation-for="SelectedPromo" class="text-danger"></span>
+                </div>
+
+                <!-- Discount Options -->
+                <div class="mb-4 form-check">
+                    <input type="checkbox" asp-for="DiscountPWD" class="form-check-input" id="DiscountPWD" />
+                    <label asp-for="DiscountPWD" class="form-check-label ms-2">Discount (PWD)</label>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="mb-4">
+                    <label for="TotalAmount" class="form-label">Total Amount</label>
+                    <input type="text" id="TotalAmountDisplay" class="form-control rounded-pill" readonly />
+                    <input type="hidden" id="TotalAmount" name="TotalAmount" asp-for="TotalAmount" />
+                </div>
+
+                <!-- Waiver Form Modal Trigger -->
+                <button type="button" class="btn btn-outline-primary rounded-pill w-100 mb-4" data-bs-toggle="modal" data-bs-target="#waiverModal">
+                    View and Sign Waiver
+                </button>
+
+                <!-- Hidden field for SignatureData -->
+                <input type="hidden" name="SignatureData" id="signatureData" />
+
+                <!-- Register Button -->
+                <button type="submit" class="btn btn-primary rounded-pill w-100" id="registerBtn" disabled>Register</button>
+
+                <!-- Waiver Modal -->
+                <div class="modal fade" id="waiverModal" tabindex="-1" aria-labelledby="waiverModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content rounded-3 p-4">
+                            <h5 class="modal-title text-center mb-3" id="waiverModalLabel">Waiver Agreement</h5>
+                            <div class="modal-body">
+                                <p class="text-secondary mb-4">
+                                    I, the undersigned, acknowledge that I am aware of the risks associated with the activities at WiiJUMP Trampoline Park. I agree to the following terms regarding the wristband issued to me:
+                                </p>
+                                <ul class="text-secondary mb-4 waiver-terms-list" style="list-style: none; padding-left: 0;">
+                                    <li><strong>Responsibility for Wristband:</strong> I understand that I am responsible for the wristband issued to me. I agree to take care of it and ensure it is not lost or damaged.</li>
+                                    <li><strong>Lost or Damaged Wristband:</strong> In the event that my wristband is lost or damaged, I agree to notify WiiJUMP staff immediately. I understand that there may be a replacement fee for lost or damaged wristbands.</li>
+                                    <li><strong>Liability Release:</strong> I hereby release and hold harmless WiiJUMP Trampoline Park, its owners, employees, and agents from any and all claims, liabilities, or damages arising from the loss or damage of my wristband.</li>
+                                    <li><strong>Acknowledgment of Terms:</strong> I have read and understood the terms of this waiver and agree to abide by them.</li>
+                                </ul>
+
+                                <!-- Terms and Conditions Checkbox -->
+                                <div class="form-check mb-3">
+                                    <input type="checkbox" class="form-check-input" id="termsCheckbox" />
+                                    <label class="form-check-label" for="termsCheckbox">I agree to the terms and conditions stated above</label>
+                                </div>
+
+                                <!-- Signature Canvas -->
+                                <canvas id="signature" class="signature-box" width="400" height="200"></canvas>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearSignature()">Clear Signature</button>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn btn-primary rounded-pill w-75 mt-3" id="acceptBtn" data-bs-dismiss="modal" disabled>Accept and Sign</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scanner Modal -->
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 p-4">
+            <h5 class="modal-title text-center mb-3" id="scannerModalLabel">RFID Scanner</h5>
+            <div class="modal-body text-center">
+                <p class="text-secondary">Scans remaining: <span id="remainingScans"></span></p>
+                <button type="button" class="btn btn-success rounded-pill mt-3" onclick="scanRFID()">Scan RFID</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const acceptBtn = document.getElementById('acceptBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    const canvas = document.getElementById('signature');
+    const signaturePad = new SignaturePad(canvas);
+
+    const promoRates = {
+        '499': 499,
+        '399': 399,
+        '3990': 3990,
+        '7485': 7485,
+        'open': 0  // No charge for Open Time for Multipass
+    };
+
+    function checkAcceptConditions() {
+        // Enable Accept button only if terms are checked and a signature exists
+        acceptBtn.disabled = !(termsCheckbox.checked && !signaturePad.isEmpty());
+    }
+
+    // Enable register button only after accepting
+    acceptBtn.addEventListener('click', function () {
+        if (!signaturePad.isEmpty()) {
+            // Save signature data in hidden input
+            document.getElementById('signatureData').value = signaturePad.toDataURL();
+            registerBtn.disabled = false; // Enable Register button
+            new bootstrap.Modal(document.getElementById('waiverModal')).hide(); // Hide the modal
+        }
+    });
+
+    // Event listeners for conditions
+    termsCheckbox.addEventListener('change', checkAcceptConditions);
+    canvas.addEventListener('mouseup', checkAcceptConditions);
+    canvas.addEventListener('touchend', checkAcceptConditions);
+
+    function clearSignature() {
+        signaturePad.clear();
+        checkAcceptConditions(); // Re-evaluate conditions after clearing signature
+    }
+
+    document.getElementById('SelectedPromo').addEventListener('change', calculateTotal);
+    document.getElementById('NumberOfJumpers').addEventListener('input', calculateTotal);
+    document.getElementById('DiscountPWD').addEventListener('change', calculateTotal);
+
+    // Calculate Total amount
+    function calculateTotal() {
+        const jumpers = parseInt(document.getElementById('NumberOfJumpers').value) || 1;
+        const promoValue = document.getElementById('SelectedPromo').value;
+        let promoRate = promoRates[promoValue] || 0;
+        let totalAmount = jumpers * promoRate;
+
+        if (promoValue === 'open') {
+            totalAmount = 0; // No charge for Open Time for Multipass
+        } else if (document.getElementById('DiscountPWD').checked) {
+            const discountAmount = promoRate * 0.2; // 20% discount
+            totalAmount -= discountAmount;
+        }
+
+        // Display and store the total amount
+        document.getElementById('TotalAmountDisplay').value = `₱${totalAmount.toFixed(2)}`;
+        document.getElementById('TotalAmount').value = totalAmount;
+    }
+</script>
+
+
+<!-- Custom Styles -->
+<style>
+    /* Global body styling for consistency across pages */
+    body {
+        background-color: #f4f6f9;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* Form container styling */
+    .form-container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Form label styling */
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        font-family: inherit; /* Ensuring consistency across all text elements */
+    }
+
+    /* Modal content consistency */
+    .modal-content {
+        border-radius: 15px;
+        box-shadow: none;
+        background-color: #ffffff;
+        padding: 30px; /* Added extra padding for better layout */
+        font-family: inherit; /* Inherit font family */
+    }
+
+    /* Signature box styling */
+    .signature-box {
+        height: auto;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6; /* Added border for clarity */
+    }
+
+    /* Primary button styling */
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        font-family: inherit; /* Consistent font for buttons */
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-outline-secondary {
+        margin-top: 10px;
+    }
+
+    /* Ensuring consistent font and size for all form elements */
+    input, select, button, textarea {
+        font-family: inherit; /* Ensure font consistency across form elements */
+        font-size: 1rem;
+    }
+
+    /* Waiver modal font consistency */
+    #waiverModal p, #waiverModal ul {
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #495057;
+    }
+
+    /* Waiver agreement terms styling */
+    .waiver-terms-list li {
+        margin-bottom: 15px; /* Add space between terms */
+    }
+
+    /* Modal size and styling for Waiver Agreement */
+    .modal-dialog.modal-lg {
+        max-width: 800px; /* Larger size for waiver agreement modal */
+    }
+
+    /* Buttons */
+    .btn-outline-secondary {
+        margin-top: 10px; /* Spacing for the "Clear Signature" button */
+    }
+
+    /* Total Amount styling */
+    #TotalAmount {
+        font-weight: bold;
+        color: #007bff; /* Total amount colored to emphasize */
+    }
+</style>
