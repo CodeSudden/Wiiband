@@ -52,6 +52,13 @@
                     <label asp-for="DiscountPWD" class="form-check-label ms-2">Discount (PWD)</label>
                 </div>
 
+                <!-- Number of Discounts (Hidden initially) -->
+                <div class="mb-4" id="discountsSection" style="display: none;">
+                    <label asp-for="NumberOfDiscounts" class="form-label">Number of Discount(s)</label>
+                    <input type="number" asp-for="NumberOfDiscounts" class="form-control rounded-pill" min="0" value="0" />
+                    <span asp-validation-for="NumberOfDiscounts" class="text-danger"></span>
+                </div>
+
                 <!-- Total Amount -->
                 <div class="mb-4">
                     <label for="TotalAmount" class="form-label">Total Amount</label>
@@ -107,6 +114,7 @@
     </div>
 </div>
 
+
 <!-- Scanner Modal -->
 <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -139,23 +147,6 @@
         .withUrl("/StaffDashboardHub")
         .build();
 
-    // Function to handle incoming registration updates
-    connection.on("ReceiveRegistrationUpdate", function (data) {
-        const visitorList = document.getElementById("visitorList");
-
-        // Create a new div element for each visitor update
-        const visitorDiv = document.createElement("div");
-        visitorDiv.textContent = `Customer: ${data.CustomerName}, Jumpers: ${data.NumberOfJumpers}, Transaction: ${data.TransactionNumber}`;
-
-        // Append the new visitor update to the list
-        visitorList.appendChild(visitorDiv);
-    });
-
-    // Start the SignalR connection
-    connection.start().catch(function (err) {
-        return console.error(err.toString());
-    });
-
     const promoRates = {
         '499': 499,
         '399': 399,
@@ -164,27 +155,44 @@
         'open': 0  // No charge for Open Time for Multipass
     };
 
-    let remainingScans = 0;
-
     document.getElementById('SelectedPromo').addEventListener('change', calculateTotal);
     document.getElementById('NumberOfJumpers').addEventListener('input', calculateTotal);
-    document.getElementById('DiscountPWD').addEventListener('change', calculateTotal);
+    document.getElementById('DiscountPWD').addEventListener('change', toggleDiscountField);
+    document.getElementById('NumberOfDiscounts').addEventListener('input', calculateTotal);
+
+    function toggleDiscountField() {
+        const isChecked = document.getElementById('DiscountPWD').checked;
+        const discountsSection = document.getElementById('discountsSection');
+
+        if (isChecked) {
+            discountsSection.style.display = 'block'; // Show the number of discounts field
+        } else {
+            discountsSection.style.display = 'none'; // Hide the number of discounts field
+            document.getElementById('NumberOfDiscounts').value = 0; // Reset the number of discounts
+        }
+
+        calculateTotal(); // Recalculate the total when the discount is toggled
+    }
 
     function calculateTotal() {
         const jumpers = parseInt(document.getElementById('NumberOfJumpers').value) || 1;
         const promoValue = document.getElementById('SelectedPromo').value;
+        const numberOfDiscounts = parseInt(document.getElementById('NumberOfDiscounts').value) || 0;
         let promoRate = promoRates[promoValue] || 0;
         let totalAmount = jumpers * promoRate;
 
         if (promoValue === 'open') {
             totalAmount = 0;
-        } else if (document.getElementById('DiscountPWD').checked) {
-            const discountAmount = promoRate * 0.2;
+        } else {
+            const maxDiscounts = Math.min(numberOfDiscounts, jumpers); // Cap discounts by the number of jumpers
+            const discountAmount = promoRate * 0.2 * maxDiscounts;
             totalAmount -= discountAmount;
         }
 
         document.getElementById('TotalAmount').value = `₱${totalAmount.toFixed(2)}`;
     }
+
+    calculateTotal(); // Initial calculation
 
     function openScannerModal() {
         remainingScans = parseInt(document.getElementById('NumberOfJumpers').value);
@@ -213,7 +221,7 @@
         const customerName = document.getElementById('CustomerName').value;
         const numberOfJumpers = document.getElementById('NumberOfJumpers').value;
         const totalAmount = document.getElementById('TotalAmount').value;
-        
+
         const transactionNumber = generateTransactionNumber();
 
         // Send the registration data to the SignalR hub
