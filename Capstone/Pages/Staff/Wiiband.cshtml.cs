@@ -13,14 +13,12 @@ namespace Capstone.Pages.Staff
 {
     public class WiibandModel : PageModel
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IHubContext<StaffDashboardHub> _hubContext;
+        private readonly IConfiguration _configuration;
 
         // Constructor where both _context and _hubContext are injected
         public WiibandModel(ApplicationDbContext context, IHubContext<StaffDashboardHub> hubContext)
         {
-            _context = context;
-            _hubContext = hubContext;
+            _configuration = configuration;
         }
 
         // Form properties
@@ -38,6 +36,8 @@ namespace Capstone.Pages.Staff
 
         [BindProperty]
         public bool DiscountPWD { get; set; }
+        public int TotalAmount { get; set; }
+        public string? Waiver {  get; set; }
 
         [BindProperty, Range(0, int.MaxValue, ErrorMessage = "Please enter a valid number of discounts.")]
         public int NumberOfDiscounts { get; set; } = 0;
@@ -150,7 +150,7 @@ namespace Capstone.Pages.Staff
                 }
             }
 
-            return totalAmount;
+            return RedirectToPage("Success"); // Redirect to a success page
         }
 
         // Utility method to calculate remaining time between start and end time
@@ -177,4 +177,5 @@ namespace Capstone.Pages.Staff
             }
         }
     }
+
 }

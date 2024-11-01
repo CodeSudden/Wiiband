@@ -1,5 +1,7 @@
+using Capstone.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Linq;
 
 namespace Capstone.Pages // Ensure this namespace matches your project structure
 {

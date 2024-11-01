@@ -5,14 +5,16 @@
     Layout = "_StaffLayout";
     @using Newtonsoft.Json;
 
-    // Serialize the upcoming events to JSON to pass to the FullCalendar
+    //Serialize the upcoming events to JSON to pass to the FullCalendar
     var calendarEventsJson = JsonConvert.SerializeObject(Model.UpcomingEvents.Select(e => new
     {
         title = e.Name,
         start = e.Date.ToString("yyyy-MM-dd"),  // FullCalendar expects the date format as yyyy-MM-dd
-        end = e.Date.AddDays(1).ToString("yyyy-MM-dd"),  // Assuming the event is a one-day event, adjust as needed
-        description = e.Description,
-        attendees = e.Attendees
+        starttime = e.Time.ToString(@"hh\:mm"),
+        endtime = e.Time.Add(TimeSpan.FromHours(e.Duration)),
+        dura = e.Duration,
+        addons = e.AddonsData,
+        jumpers = e.Jumpers,
     }));
 }
 
@@ -24,7 +26,7 @@
     <!-- Calendar Section with New Event Button -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="text-primary mb-0">Event Calendar</h2>
-        <button type="button" class="btn btn-primary" id="openEventModal">
+        <button type="button" class="btn btn-primary" id="openEventModal" data-bs-toggle="modal" data-bs-target="#eventModal">
             + New Event
         </button>
     </div>
@@ -57,10 +59,11 @@
                     <thead class="table-light">
                         <tr>
                             <th>Event Name</th>
+                            <th>Email</th>
                             <th>Date</th>
-                            <th>Location</th>
-                            <th>Attendees</th>
-                            <th>Status</th>
+                            <th>Time</th>
+                            <th>Jumpers</th>
+                            <th>Duration</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -68,8 +71,10 @@
                         {
                              <tr class="event-row" data-date="@upcomingEvent.Date.ToString("yyyy-MM-dd")">
                                 <td>@upcomingEvent.Name</td>
+                                <td>@upcomingEvent.Email</td>
                                 <td>@upcomingEvent.Date.ToString("MMMM dd, yyyy")</td>
-                                <td>@upcomingEvent.Location</td>
+
+                                <!--<td>@upcomingEvent.Location</td>
                                 <td>@upcomingEvent.Attendees</td>
                                 <td>
                                     <span class="badge bg-@(@upcomingEvent.IsConfirmed ? "success" : "warning")">
@@ -79,7 +84,12 @@
                                 <td>
                                     <button class="btn btn-warning btn-sm" onclick="editEvent('@upcomingEvent.Name')">Edit</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteEvent('@upcomingEvent.Name')">Delete</button>
-                                </td>
+                                </td>-->
+                               
+                                <td>@upcomingEvent.Time</td>
+                                <td>@upcomingEvent.Jumpers Persons</td>
+                                <td>@upcomingEvent.Duration hrs</td>
+                               
                             </tr>
                         }
                     </tbody>
@@ -98,38 +108,38 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form method="post" id="customPackageForm" onsubmit="openContractModal(event)">
+                <form method="post" id="customPackageForm">
                     <!-- Customer Information -->
                     <h6>Customer Information</h6>
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" name="CustomerName" class="form-control rounded-pill" required />
+                        <input type="text" asp-for="Name" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" name="CustomerEmail" class="form-control rounded-pill" required />
+                        <input type="email" asp-for="Email" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" name="CustomerPhone" class="form-control rounded-pill" required />
+                        <input type="tel" asp-for="Phone" class="form-control rounded-pill" required />
                     </div>
 
                     <!-- Event Date and Time -->
                     <h6>Event Date and Time</h6>
                     <div class="mb-3">
                         <label class="form-label">Event Date</label>
-                        <input type="date" name="EventDate" class="form-control rounded-pill" required />
+                        <input type="date" asp-for="Date" class="form-control rounded-pill" required />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Event Time</label>
-                        <input type="time" name="EventTime" class="form-control rounded-pill" required />
+                        <input type="time" asp-for="Time" class="form-control rounded-pill" required />
                     </div>
 
                     <!-- Jumping Package -->
                     <h6>Jumping Package</h6>
                     <div class="mb-3">
                         <label class="form-label">Time</label>
-                        <select name="JumpTime" class="form-select rounded-pill">
+                        <select asp-for="Duration" class="form-select rounded-pill">
                             <option value="1">1 Hour</option>
                             <option value="2">2 Hours</option>
                             <option value="3">3 Hours</option>
@@ -137,51 +147,52 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Jumpers</label>
-                        <input type="number" name="NumberOfJumpers" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Jumpers" class="form-control rounded-pill" min="1" required />
                         <small>₱499/head</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Socks</label>
-                        <input type="number" name="NumberOfSocks" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Socks" class="form-control rounded-pill" min="1" required />
                     </div>
 
                     <!-- Add-ons -->
                     <h6>Add-ons</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="EInvitation" id="eInvitation">
+                        <input class="form-check-input" type="checkbox" asp-for="EInvitation" id="eInvitation">
                         <label class="form-check-label" for="eInvitation">E-Invitation</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="GameCoach" id="gameCoach">
+                        <input class="form-check-input" asp-for="GameCoach" type="checkbox" id="gameCoach">
                         <label class="form-check-label" for="gameCoach">2 Game Coach</label>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Trampoline Games (How many?)</label>
-                        <input type="number" name="TrampolineGames" class="form-control rounded-pill" min="1" required />
-                    </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="WaterBottle" id="waterBottle">
+                        <input class="form-check-input" asp-for="WaterBottle" type="checkbox" id="waterBottle">
                         <label class="form-check-label" for="waterBottle">Water Bottle</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="MelonaIceCream" id="melonaIceCream">
+                        <input class="form-check-input" asp-for="MelonaIC" type="checkbox" id="melonaIceCream">
                         <label class="form-check-label" for="melonaIceCream">Melona Ice Cream</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Trampoline Games (How many?)</label>
+                        <input type="number" asp-for="TrampolineGames" class="form-control rounded-pill" min="1" required />
                     </div>
 
                     <!-- Party Area -->
                     <h6>Party Area</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="PartyArea" id="partyArea" onchange="togglePartyAreaDetails(this)">
+                        <input class="form-check-input" type="checkbox" id="partyArea" onchange="togglePartyAreaDetails(this)">
                         <label class="form-check-label" for="partyArea">Party Area</label>
                     </div>
                     <div id="partyAreaDetails" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">How many guests?</label>
-                            <input type="number" name="PartyGuests" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyGuest"class="form-control rounded-pill" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">How many hours?</label>
-                            <input type="number" name="PartyHours" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyHours" class="form-control rounded-pill"/>
                         </div>
                         <small>Includes: Tables, Chairs, Tablecloth, Sound System</small>
                     </div>
@@ -189,26 +200,27 @@
                     <!-- Party Decorations -->
                     <h6>Party Decorations</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="PartyDecorations" id="partyDecorations" onchange="toggleDecorationOptions(this)">
+                        <input class="form-check-input" type="checkbox" id="partyDecorations" onchange="toggleDecorationOptions(this)">
                         <label class="form-check-label" for="partyDecorations">Party Decorations</label>
                     </div>
                     <div id="decorationOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Choose a package</label>
-                            <select name="DecorationPackage" class="form-select rounded-pill">
+                            <select asp-for="PartyDecorations" class="form-select rounded-pill">
+                                <option hidden value="Null"></option>
                                 <option value="HalfDeck">Half Deck - ₱8,000</option>
                                 <option value="WholeDeck">Whole Deck - ₱15,000</option>
                                 <option value="Premium">Premium - ₱25,000</option>
                             </select>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="FoodCart" id="foodCart" onchange="toggleFoodCart(this)">
+                            <input class="form-check-input" type="checkbox" id="foodCart" onchange="toggleFoodCart(this)">
                             <label class="form-check-label" for="foodCart">Include a food cart?</label>
                         </div>
                         <div id="foodCartOptions" style="display: none;">
                             <div class="mb-3">
                                 <label class="form-label">Electricity Charge per food cart</label>
-                                <input type="number" name="ElectricityCharge" class="form-control rounded-pill" value="1000" readonly />
+                                <input type="number" asp-for="ElecFoodCart" class="form-control rounded-pill" value="1000" readonly />
                             </div>
                         </div>
                     </div>
@@ -222,11 +234,11 @@
                     <div id="equipmentOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Chafing Dish (₱500/pc)</label>
-                            <input type="number" name="ChafingDish" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyEquipCD" class="form-control rounded-pill" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Plates, Glass, Spoon & Fork (₱100 per person)</label>
-                            <input type="number" name="PartyUtensils" class="form-control rounded-pill" min="1" />
+                            <input type="number" asp-for="PartyEquipUtils" class="form-control rounded-pill" />
                         </div>
                     </div>
 
@@ -250,13 +262,8 @@
                 <div id="noEventsMessage" style="display: none;">
                     <p>No events scheduled for this day.</p>
                 </div>
-                <div id="eventDetailsContent" style="display: none;">
-                    <div class="event-detail">
-                        <h5 id="eventTitle"></h5>
-                        <p><strong>Start:</strong> <span id="eventStart"></span></p>
-                        <p><strong>End:</strong> <span id="eventEnd"></span></p>
-                        <p><strong>Description:</strong> <span id="eventDescription"></span></p>
-                    </div>
+                <div id="eventDetailsContent">
+
                 </div>
             </div>
             <div class="modal-footer">
@@ -300,27 +307,21 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('eventCalendar');
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal')); // Initialize modal
+
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: @Html.Raw(calendarEventsJson),  // Load events from the backend
+            events: @Html.Raw(calendarEventsJson), // Make sure this is your valid JSON data
+
             // Handle date click to show events for that date
             dateClick: function (info) {
                 const clickedDate = info.dateStr;
                 const eventsForDay = calendar.getEvents().filter(event => event.startStr === clickedDate);
-
                 populateEventDetailsModal(eventsForDay, clickedDate);
-
-                const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-                eventDetailsModal.show();
+                modal.show(); // Show modal when a date is clicked
             }
         });
         calendar.render();
-
-        // Show the event creation modal when "+ New Event" is clicked
-        document.getElementById('openEventModal').addEventListener('click', function () {
-            const bookingModal = new bootstrap.Modal(document.getElementById('eventModal'));
-            bookingModal.show();
-        });
 
         // Filter logic
         const filterOptions = document.querySelectorAll('.filter-option');
@@ -358,66 +359,40 @@
         });
     });
 
-    function populateEventDetailsModal(events, clickedDate) {
-        const modalBody = document.getElementById('eventDetailsModalBody');
-        modalBody.innerHTML = ''; // Clear existing content
-        if (events.length > 0) {
-            events.forEach(event => {
-                const eventDetails = `
-                        <div class="event-detail">
-                            <h5>${event.title}</h5>
-                            <p><strong>Start:</strong> ${event.start.toLocaleString()}</p>
-                            <p><strong>End:</strong> ${event.end ? event.end.toLocaleString() : 'N/A'}</p>
-                            <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
-                        </div><hr>`;
-                modalBody.innerHTML += eventDetails;
-            });
-        } else {
-            modalBody.innerHTML = '<p>No events scheduled for this day.</p>';
-        }
-    }
-
-    function openContractModal(event) {
-        event.preventDefault();
-        const bookingModal = new bootstrap.Modal(document.getElementById('contractModal'));
-        bookingModal.show();
-    }
-
- 
-
     // Function to populate the event details modal with events for the clicked date
     function populateEventDetailsModal(events, clickedDate) {
         const modalBody = document.getElementById('eventDetailsModalBody');
         const modalTitle = document.getElementById('eventDetailsModalTitle');
-        const noEventsMessage = document.getElementById('noEventsMessage');
-        const eventDetailsContent = document.getElementById('eventDetailsContent');
-        const eventTitle = document.getElementById('eventTitle');
-        const eventStart = document.getElementById('eventStart');
-        const eventEnd = document.getElementById('eventEnd');
-        const eventDescription = document.getElementById('eventDescription');
+
+        // Set modal title
+        modalTitle.innerText = `Events on ${clickedDate}`;
 
         // Reset modal content
-        modalTitle.innerHTML = `Events on ${clickedDate}`;
         modalBody.innerHTML = ''; // Clear any previous content
 
         if (events.length > 0) {
             events.forEach(event => {
-                const eventDetails = `
-                                <div class="event-detail">
-                                    <h5>${event.title}</h5>
-                                    <p><strong>Start:</strong> ${event.start.toLocaleString()}</p>
-                                    <p><strong>End:</strong> ${event.end ? event.end.toLocaleString() : 'N/A'}</p>
-                                    <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
-                                </div>
-                                <hr />
-                            `;
+                const startTime = event.extendedProps.starttime ? event.extendedProps.starttime.slice(0, 5) : 'N/A';
+                const endTime = event.extendedProps.endtime ? event.extendedProps.endtime.slice(0, 5) : 'N/A';
+                const addons = event.extendedProps.addons || 'No addons';
+
+                const eventDetails =
+                    `<div class="event-detail">
+                        <h5>${event.title || "No Title"}</h5>
+                        <p><strong>Start:</strong> ${startTime}</p>
+                        <p><strong>End:</strong> ${endTime}</p>
+                        <p><strong>Addons:</strong> ${addons}</p>
+                        <p><strong>Duration:</strong> ${event.extendedProps.dura}</p>
+                        <p><strong>Jumpers:</strong> ${event.extendedProps.jumpers}</p>
+                    </div>
+                    <hr />`;
                 modalBody.innerHTML += eventDetails;
             });
         } else {
             modalBody.innerHTML = '<p>No events scheduled for this day.</p>';
         }
     }
-
+  
     window.editEvent = function(eventId) {
             const event = calendar.getEventById(eventId);
             if (event) {
@@ -468,13 +443,28 @@
     }
 
     function toggleDecorationOptions(checkbox) {
-        const options = document.getElementById('decorationOptions');
-        options.style.display = checkbox.checked ? 'block' : 'none';
+        const decorationOptions = document.getElementById("decorationOptions");
+        const partyDecorationsSelect = document.querySelector("[asp-for='PartyDecorations']");
+
+        if (checkbox.checked) {
+            decorationOptions.style.display = "block";
+        } else {
+            decorationOptions.style.display = "none";
+            partyDecorationsSelect.value = "";
+        }
     }
 
     function toggleFoodCart(checkbox) {
-        const options = document.getElementById('foodCartOptions');
-        options.style.display = checkbox.checked ? 'block' : 'none';
+        const foodCartOptions = document.getElementById("foodCartOptions");
+        const elecFoodCartInput = document.querySelector("[asp-for='ElecFoodCart']");
+
+        if (checkbox.checked) {
+            foodCartOptions.style.display = "block";
+            elecFoodCartInput.value = 1000;
+        } else {
+            foodCartOptions.style.display = "none";
+            elecFoodCartInput.value = 0;
+        }
     }
 
     function toggleEquipmentOptions(checkbox) {
@@ -482,7 +472,6 @@
         options.style.display = checkbox.checked ? 'block' : 'none';
     }
 </script>
-
 
 <!-- Styles -->
 <style>

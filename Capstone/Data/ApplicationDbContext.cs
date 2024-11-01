@@ -1,17 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using System;
 using Capstone.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Capstone.Data
+namespace Capstone.Data // Replace with your actual namespace if different
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
-
-        // DbSets for your entities
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+        
+        /* DbSets for your entities
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
@@ -59,63 +58,62 @@ namespace Capstone.Data
             modelBuilder.Entity<Transaction>()
                 .Property(t => t.TotalAmount)
                 .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
-        }
+        }*/
+
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<Events> Events { get; set; }
     }
 
-    public class Customer
+    public class Users
     {
-        public int Id { get; set; }  // Primary key
-        public string CustomerName { get; set; }
-        public string Email { get; set; }
-        public int NumberOfJumpers { get; set; }
-        public bool DiscountPWD { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string TransactionNumber { get; set; }  // Transaction number field
-        public DateTime CreatedAt { get; set; } = DateTime.Now; // To track when the customer was created
+        public int Id { get; set; }
+        public string? Username { get; set; }
+        public string? Password { get; set; }
+        public string? Type { get; set; }
+        public string? Display_name { get; set; }
+        public string? Email_address { get; set; }
+        public bool Email_notify { get; set; }
+        public bool Sms_notify { get; set; }
+        public bool Visibility { get; set; }
+        public bool Third_party {  get; set; }
+        public string? Theme { get; set; }
+        public DateTime Created_at { get; set; }
+        public DateTime Updated_at { get; set; }
     }
 
-    public class Staff
-    {
-        public int StaffId { get; set; }  // Primary key
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public string PasswordHash { get; set; }
-        public string Role { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+    public class Customers
+    { 
+        public int Id { get; set; }
+        public string? Customer_name { get; set; }
+        public string? Customer_email { get; set; }
+        public int Num_jumpers { get; set; }
+        public int Promo { get; set; }
+        public int Discount { get; set; }
+        public int Total_amount { get; set; }
+        public string? SignatureData { get; set; }
+        public DateTime Created_at { get; set; }
     }
 
-    public class WiibandRegistration
+    public class Events
     {
-        public int Id { get; set; }  // Primary key
-        public int StaffId { get; set; }
-        public string CustomerName { get; set; }
-        public string Email { get; set; }
-        public int NumberOfJumpers { get; set; }
-        public string SelectedPromo { get; set; }
-        public bool DiscountPWD { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string TransactionNumber { get; set; }
-        public DateTime RegistrationDate { get; set; }
-
-        public Staff Staff { get; set; }  // Navigation property
-    }
-
-    public class Transaction
-    {
-        public int TransactionId { get; set; }  // Primary key
-        public string TransactionNumber { get; set; }
-        public string Wiiband { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public string RemainingTime { get; set; }
-        public string Status { get; set; }
-        public string Battery { get; set; }
-        public decimal TotalAmount { get; set; }
-        public DateTime CreatedAt { get; set; }
-
-        public WiibandRegistration WiibandRegistration { get; set; }  // Navigation property
-        public int WiibandRegistrationId { get; set; }  // Foreign key
+        public int Id { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public int Phone { get; set; }
+        public DateOnly Date { get; set; }
+        public TimeOnly Time { get; set; }
+        public int Duration { get; set; }
+        public int Jumpers { get; set; }
+        public int Socks { get; set; }
+        public string? Addons { get; set; }
+        public int TrampolineGames { get; set; }
+        public int PartyGuest { get; set; }
+        public int PartyHours { get; set; }
+        public string? PartyDecorations { get; set; }
+        public int ElecFoodCart { get; set; }
+        public int PartyEquipCD { get; set; }
+        public int PartyEquipUtils { get; set; }
+        public DateTime Created_at { get; set; }
     }
 }

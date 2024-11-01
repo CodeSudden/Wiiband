@@ -15,26 +15,25 @@
     </div>
 </div>
 
-<!-- Page Title -->
-<div class="row mb-4">
-    <div class="col">
-        <h2>Dashboard - Fiesta Carnival</h2>
-    </div>
-</div>
-
 <div class="container mt-4">
+    <!-- Page Title -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Dashboard - Fiesta Carnival</h2>
+        </div>
+    </div>
     <!-- Info Boxes -->
     <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
-                    <h5>August 1</h5>
-                    <p>2024</p>
+                    <h5 id="month">August</h5>
+                    <p id="year">2024</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-people-fill icon"></i>
                 <div class="info-text">
@@ -43,9 +42,18 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
-                <i class="bi bi-currency-dollar icon"></i>
+                <i class="bi bi-watch icon"></i>
+                <div class="info-text">
+                    <h5>9</h5>
+                    <p>Active now</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-cash-stack icon"></i>
                 <div class="info-text">
                     <h5>₱5988</h5>
                     <p>Total Sales</p>
@@ -82,7 +90,8 @@
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
                                 <th>Status</th>
-                                <th>Battery</th>
+                                <th>Deactivation</th>
+                                @*<th>Battery</th>*@
                             </tr>
                         </thead>
                         <tbody>
@@ -90,18 +99,18 @@
                             
                             @foreach (var entry in Model.DashboardEntries)
                             {
-                                        <tr>
-                                        <td>@entry.TransactionNumber</td>
-                                        <td>@entry.WiibandID</td>
-                                        <td>@entry.CustomerName</td>  <!-- New Field -->
-                                        <td>@entry.Email</td>          <!-- New Field -->
-                                        <td>@entry.StartTime?.ToString(@"hh\:mm")</td>
-                                        <td>@entry.EndTime?.ToString(@"hh\:mm")</td>
-                                        <td>@entry.RemainingTime</td>
-                                        <td>@entry.Status</td>
-                                        <td>@entry.BatteryLevel?.ToString("0.##")%</td>
-                                        </tr>
-                                }
+                                  <tr>
+                                  <td>@entry.TransactionNumber</td>
+                                  <td>@entry.WiibandID</td>
+                                  <td>@entry.CustomerName</td>  <!-- New Field -->
+                                  <td>@entry.Email</td>          <!-- New Field -->
+                                  <td>@entry.StartTime?.ToString(@"hh\:mm")</td>
+                                  <td>@entry.EndTime?.ToString(@"hh\:mm")</td>
+                                  <td>@entry.RemainingTime</td>
+                                  <td>@entry.Status</td>
+                                  <td>@entry.BatteryLevel?.ToString("0.##")%</td>
+                                  </tr>
+                             }
                         </tbody>
                     </table>
                 </div>
@@ -112,11 +121,19 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const d = new Date();
+    let month = months[d.getMonth()];
+    let day = d.getDate();
+    let year = d.getFullYear();
+    document.getElementById("month").innerHTML = month + day;
+    document.getElementById("year").innerHTML = year;
+
     // Establish a connection to the SignalR hub
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/StaffDashboardHub")  // Make sure the URL matches the one mapped in Startup.cs
         .build();
-
+  
      // Function to handle incoming registration updates
         connection.on("ReceiveRegistrationUpdate", function (data) {
             const tableBody = document.querySelector("#transactionTable tbody");
@@ -165,6 +182,13 @@
         font-weight: 700;
         color: #212529;
         margin-bottom: 0.5rem;
+    }
+
+    .btn-deactivate {
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 4px 11px;
     }
 
     .btn-download {

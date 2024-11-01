@@ -6,13 +6,17 @@
     @using Newtonsoft.Json;
 
     // Serialize the upcoming events to JSON to pass to the FullCalendar
+
     var calendarEventsJson = JsonConvert.SerializeObject(Model.UpcomingEvents.Select(e => new
+
     {
         title = e.Name,
         start = e.Date.ToString("yyyy-MM-dd"),  // FullCalendar expects the date format as yyyy-MM-dd
-        end = e.Date.AddDays(1).ToString("yyyy-MM-dd"),  // Assuming the event is a one-day event, adjust as needed
-        description = e.Description,
-        attendees = e.Attendees
+        starttime = e.Time.ToString(@"hh\:mm"),
+        endtime = e.Time.Add(TimeSpan.FromHours(e.Duration)),
+        dura = e.Duration,
+        addons = e.AddonsData,
+        jumpers = e.Jumpers,
     }));
 }
 
@@ -57,20 +61,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var upcomingEvent in Model.UpcomingEvents)
-                        {
-                            <tr class="event-row" data-date="@upcomingEvent.Date.ToString("yyyy-MM-dd")">
-                                <td>@upcomingEvent.Name</td>
-                                <td>@upcomingEvent.Date.ToString("MMMM dd, yyyy")</td>
-                                <td>@upcomingEvent.Location</td>
-                                <td>@upcomingEvent.Attendees</td>
-                                <td>
-                                    <span class="badge bg-@(@upcomingEvent.IsConfirmed ? "success" : "warning")">
-                                        @(@upcomingEvent.IsConfirmed ? "Confirmed" : "Pending")
-                                    </span>
-                                </td>
-                            </tr>
-                        }
+                    @foreach (var upcomingEvent in Model.UpcomingEvents)
+                    {
+                        <tr class="event-row" data-date="@upcomingEvent.Date.ToString("yyyy-MM-dd")">
+                            <td>@upcomingEvent.Name</td>
+                            <td>@upcomingEvent.Email</td>
+                            <td>@upcomingEvent.Date.ToString("MMMM dd, yyyy")</td>
+                            <td>@upcomingEvent.Time</td>
+                            <td>@upcomingEvent.Jumpers Persons</td>
+                            <td>@upcomingEvent.Duration hrs</td>
+                        </tr>
+                    }
                     </tbody>
                 </table>
             </div>
@@ -111,20 +112,20 @@
 <!-- FullCalendar Script -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.0.2/index.global.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+   document.addEventListener('DOMContentLoaded', function () {
         const calendarEl = document.getElementById('eventCalendar');
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal')); // Initialize modal
+
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: @Html.Raw(calendarEventsJson),  // Load events from the backend
+            events: @Html.Raw(calendarEventsJson), // Make sure this is your valid JSON data
+
             // Handle date click to show events for that date
             dateClick: function (info) {
                 const clickedDate = info.dateStr;
                 const eventsForDay = calendar.getEvents().filter(event => event.startStr === clickedDate);
-
                 populateEventDetailsModal(eventsForDay, clickedDate);
-
-                const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
-                eventDetailsModal.show();
+                modal.show(); // Show modal when a date is clicked
             }
         });
         calendar.render();
@@ -165,18 +166,33 @@
         });
     });
 
+    // Function to populate the event details modal with events for the clicked date
     function populateEventDetailsModal(events, clickedDate) {
         const modalBody = document.getElementById('eventDetailsModalBody');
-        modalBody.innerHTML = ''; // Clear existing content
+        const modalTitle = document.getElementById('eventDetailsModalTitle');
+
+        // Set modal title
+        modalTitle.innerText = `Events on ${clickedDate}`;
+
+        // Reset modal content
+        modalBody.innerHTML = ''; // Clear any previous content
+
         if (events.length > 0) {
             events.forEach(event => {
-                const eventDetails = `
-                        <div class="event-detail">
-                            <h5>${event.title}</h5>
-                            <p><strong>Start:</strong> ${event.start.toLocaleString()}</p>
-                            <p><strong>End:</strong> ${event.end ? event.end.toLocaleString() : 'N/A'}</p>
-                            <p><strong>Description:</strong> ${event.extendedProps.description || 'No description available'}</p>
-                        </div><hr>`;
+                const startTime = event.extendedProps.starttime ? event.extendedProps.starttime.slice(0, 5) : 'N/A';
+                const endTime = event.extendedProps.endtime ? event.extendedProps.endtime.slice(0, 5) : 'N/A';
+                const addons = event.extendedProps.addons || 'No addons';
+
+                const eventDetails =
+                    `<div class="event-detail">
+                        <h5>${event.title || "No Title"}</h5>
+                        <p><strong>Start:</strong> ${startTime}</p>
+                        <p><strong>End:</strong> ${endTime}</p>
+                        <p><strong>Addons:</strong> ${addons}</p>
+                        <p><strong>Duration:</strong> ${event.extendedProps.dura}</p>
+                        <p><strong>Jumpers:</strong> ${event.extendedProps.jumpers}</p>
+                    </div>
+                    <hr />`;
                 modalBody.innerHTML += eventDetails;
             });
         } else {

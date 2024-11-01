@@ -15,7 +15,7 @@
             <strong>Announcement:</strong> The next system maintenance is scheduled for August 15, 2024. Please save your work in advance.
         </div>
     </div>
-
+  
     <!-- Page Title -->
     <div class="row mb-4">
         <div class="col text-left">
@@ -29,8 +29,8 @@
             <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
                 <i class="bi bi-calendar-check text-primary" style="font-size: 2.5rem;"></i>
                 <div class="info-text mt-2">
-                    <h5 class="fw-bold">August 1</h5>
-                    <p class="text-muted">2024</p>
+                    <h5 id="month" class="fw-bold"></h5>
+                    <p id="year" class="text-muted"></p>
                 </div>
             </div>
         </div>
@@ -105,6 +105,53 @@
         </div>
     </div>
 </div>
+
+<!-- SignalR and Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    // Establish a connection to the SignalR hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/StaffDashboardHub")
+        .build();
+
+    // Function to handle incoming registration updates
+    connection.on("ReceiveRegistrationUpdate", function (data) {
+        const tableBody = document.querySelector("#transactionTable tbody");
+
+        // Create a new row for the transaction
+        const row = document.createElement("tr");
+
+        // Populate the new row with transaction details
+        row.innerHTML = `
+            <td>${data.TransactionNumber}</td>
+            <td>${data.Wiiband || 'N/A'}</td>
+            <td>${data.StartTime || 'N/A'}</td>
+            <td>${data.EndTime || 'N/A'}</td>
+            <td>${data.RemainingTime || 'N/A'}</td>
+            <td>
+                <span class="badge ${data.Status === 'Active' ? 'bg-success' : data.Status === 'Inactive' ? 'bg-danger' : 'bg-secondary'}">
+                    ${data.Status}
+                </span>
+            </td>
+            <td>${data.Battery || 'N/A'}</td>
+        `;
+
+        // Append the new row to the table body
+        tableBody.appendChild(row);
+    });
+
+    // Start the SignalR connection
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const d = new Date();
+    let month = months[d.getMonth()];
+    let day = d.getDate();
+    let year = d.getFullYear();
+    document.getElementById("month").innerHTML = month + " " +  day;
+    document.getElementById("year").innerHTML = year;
+</script>
 
 <!-- Enhanced Minimalist CSS Style -->
 <style>
