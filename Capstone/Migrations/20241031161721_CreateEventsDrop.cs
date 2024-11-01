@@ -6,22 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Capstone.Migrations
 {
     /// <inheritdoc />
-    public partial class AddEventsTable : Migration
+    public partial class CreateEventsDrop : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Created_at",
-                table: "Customers");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "Created_at",
-                table: "Customers",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
             migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
@@ -40,10 +29,11 @@ namespace Capstone.Migrations
                     TrampolineGames = table.Column<int>(type: "int", nullable: false),
                     PartyGuest = table.Column<int>(type: "int", nullable: false),
                     PartyHours = table.Column<int>(type: "int", nullable: false),
-                    PartyDecorations = table.Column<int>(type: "int", nullable: false),
+                    PartyDecorations = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ElecFoodCart = table.Column<int>(type: "int", nullable: false),
                     PartyEquipCD = table.Column<int>(type: "int", nullable: false),
-                    PartyEquipUtils = table.Column<int>(type: "int", nullable: false)
+                    PartyEquipUtils = table.Column<int>(type: "int", nullable: false),
+                    Created_at = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -56,17 +46,6 @@ namespace Capstone.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Events");
-
-            migrationBuilder.DropColumn(
-                name: "Created_at",
-                table: "Customers");
-
-            migrationBuilder.AddColumn<int>(
-                name: "Date_created",
-                table: "Customers",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
         }
     }
 }

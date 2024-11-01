@@ -15,8 +15,8 @@
     </div>
 </div>
 
+<!-- Page Title -->
 <div class="container mt-4">
-    <!-- Page Title -->
     <div class="row mb-4">
         <div class="col">
             <h2>Dashboard - Fiesta Carnival</h2>
@@ -28,8 +28,8 @@
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
-                    <h5>August 1</h5>
-                    <p>2024</p>
+                    <h5 id="month"></h5>
+                    <p id="year"></p>
                 </div>
             </div>
         </div>
@@ -155,8 +155,14 @@
     connection.start().catch(function (err) {
         return console.error(err.toString());
     });
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const d = new Date();
+    let month = months[d.getMonth()];
+    let day = d.getDate();
+    let year = d.getFullYear();
+    document.getElementById("month").innerHTML = month + " " +  day;
+    document.getElementById("year").innerHTML = year;
 </script>
-
 
 <!-- Enhanced Minimalist CSS Style -->
 <style>

@@ -57,20 +57,13 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int Jumpers { get; set; }
         public int Socks { get; set; }
         public string? Addons { get; set; }
-        [Column(TypeName = "int")]
-        public int TrampolineGames { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int PartyGuest { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int PartyHours { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int PartyDecorations { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int ElecFoodCart { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int PartyEquipCD { get; set; } = 0;
-        [Column(TypeName = "int")]
-        public int PartyEquipUtils { get; set; } = 0;
+        public int TrampolineGames { get; set; }
+        public int PartyGuest { get; set; }
+        public int PartyHours { get; set; }
+        public string? PartyDecorations { get; set; }
+        public int ElecFoodCart { get; set; }
+        public int PartyEquipCD { get; set; }
+        public int PartyEquipUtils { get; set; }
         public DateTime Created_at { get; set; }
     }
 }

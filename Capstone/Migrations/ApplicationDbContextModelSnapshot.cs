@@ -91,8 +91,8 @@ namespace Capstone.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PartyDecorations")
-                        .HasColumnType("int");
+                    b.Property<string>("PartyDecorations")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PartyEquipCD")
                         .HasColumnType("int");
