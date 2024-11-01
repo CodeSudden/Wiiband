@@ -112,7 +112,6 @@
 <!-- SignalR and Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const d = new Date();
     let month = months[d.getMonth()];
@@ -127,7 +126,7 @@
         .build();
 
    // Function to handle incoming registration updates
-connection.on("ReceiveRegistrationUpdate", function (data) {
+    connection.on("ReceiveRegistrationUpdate", function (data) {
     const tableBody = document.querySelector("#transactionTable tbody");
 
     // Create a new row for the transaction
