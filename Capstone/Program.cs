@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Capstone.Configurations;
 using Stripe;
-using Google;
 using Microsoft.EntityFrameworkCore;
 using Capstone.Hubs;
 using Capstone.Data;
@@ -15,11 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR(); // Add SignalR
+
 
 // Configure database connection using the connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 // Add Stripe configuration and load it from appsettings.json or environment variables
 var stripeSettings = builder.Configuration.GetSection("Stripe");
@@ -55,7 +55,6 @@ builder.Services.AddAuthentication(options =>
     options.SaveTokens = true;
 });
 
-
 // Register IHttpContextAccessor to access tokens
 builder.Services.AddHttpContextAccessor();
 
@@ -85,6 +84,5 @@ app.MapControllers();
 
 // Map the SignalR hub
 app.MapHub<StaffDashboardHub>("/StaffDashboardHub");
-
 
 app.Run();

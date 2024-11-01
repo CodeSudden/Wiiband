@@ -5,68 +5,60 @@
     Layout = "_AdminLayout";
 }
 
-<!-- Announcement Section -->
-<div class="container mt-4">
-    <div class="alert alert-info d-flex align-items-center shadow-sm p-3 rounded mb-4" role="alert">
-        <i class="bi bi-megaphone-fill me-3" style="font-size: 1.5rem;"></i>
+<!-- Outer Container for Background -->
+<div class="outer-container bg-light rounded-4 p-5 mt-4 mx-auto">
+
+    <!-- Announcement Section -->
+    <div class="alert alert-info d-flex align-items-center shadow-sm p-3 rounded mb-4">
+        <i class="bi bi-megaphone-fill me-3 text-primary" style="font-size: 2rem;"></i>
         <div>
             <strong>Announcement:</strong> The next system maintenance is scheduled for August 15, 2024. Please save your work in advance.
         </div>
     </div>
-</div>
-
-<!-- Page Title -->
-<div class="container mt-4">
+  
+    <!-- Page Title -->
     <div class="row mb-4">
-        <div class="col">
-            <h2>Dashboard - Fiesta Carnival</h2>
+        <div class="col text-left">
+            <h5 class="display-5 fw-bold text-dark">Dashboard - Fiesta Carnival</h5>
         </div>
     </div>
+
     <!-- Info Boxes -->
-    <div class="row">
-        <div class="col-md-3 mb-3">
-            <div class="info-card shadow-hover">
-                <i class="bi bi-calendar-check icon"></i>
-                <div class="info-text">
-                    <h5 id="month"></h5>
-                    <p id="year"></p>
+    <div class="row text-center">
+        <div class="col-md-4 mb-3">
+            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
+                <i class="bi bi-calendar-check text-primary" style="font-size: 2.5rem;"></i>
+                <div class="info-text mt-2">
+                    <h5 id="month" class="fw-bold"></h5>
+                    <p id="year" class="text-muted"></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="info-card shadow-hover">
-                <i class="bi bi-people-fill icon"></i>
-                <div class="info-text">
-                    <h5>12</h5>
-                    <p>Visitors</p>
+        <div class="col-md-4 mb-3">
+            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
+                <i class="bi bi-people-fill text-primary" style="font-size: 2.5rem;"></i>
+                <div class="info-text mt-2">
+                    <h5 class="fw-bold">12</h5>
+                    <p class="text-muted">Visitors</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="info-card shadow-hover">
-                <i class="bi bi-watch icon"></i>
-                <div class="info-text">
-                    <h5>9</h5>
-                    <p>Active now</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="info-card shadow-hover">
-                <i class="bi bi-cash-stack icon"></i>
-                <div class="info-text">
-                    <h5>₱5988</h5>
-                    <p>Total Sales</p>
+        <div class="col-md-4 mb-3">
+            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
+                <i class="bi bi-currency-dollar text-primary" style="font-size: 2.5rem;"></i>
+                <div class="info-text mt-2">
+                    <h5 class="fw-bold">₱5988</h5>
+                    <p class="text-muted">Total Sales</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filter Section -->
-    <div class="d-flex justify-content-between mb-4">
-        <h3>Transaction</h3>
-        <form method="post">
-            <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-muted">Transaction Overview</h3>
+        <form method="post" class="d-inline-block">
+            <select name="StatusFilter" class="form-select w-auto border-2 shadow-sm" onchange="this.form.submit()">
                 <option value="">All</option>
                 <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
                 <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
@@ -77,19 +69,17 @@
     <!-- Transaction Table -->
     <div class="row">
         <div class="col-12">
-            <div class="transaction-table">
+            <div class="transaction-table bg-white shadow-sm rounded-3 p-3">
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover" id="transactionTable">
-                        <thead class="table-primary">
+                    <table class="table table-striped table-hover align-middle text-center">
+                        <thead class="table-light">
                             <tr>
                                 <th>Transaction Number</th>
                                 <th>Wiiband</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
-                                <th>Status</th>
-                                <th>Deactivation</th>
-                                @*<th>Battery</th>*@
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,11 +92,10 @@
                                     <td>@transaction.EndTime</td>
                                     <td>@transaction.RemainingTime</td>
                                     <td>
-                                        <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Offline" ? "bg-danger" : "bg-secondary")">
-                                            @transaction.Status
-                                        </span>
+                                        <a asp-page="/Admin/Addons/DeactivateConfirmation" asp-route-transactionNumber="@transaction.TransactionNumber" class="btn btn-outline-danger btn-sm">
+                                            Deactivate
+                                        </a>
                                     </td>
-                                    <td><span class="btn btn-deactivate bg-black text-white">Deactivate</span></td>
                                 </tr>
                             }
                         </tbody>
@@ -167,153 +156,89 @@
 <!-- Enhanced Minimalist CSS Style -->
 <style>
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, sans-serif;
+        background-color: #f8f9fa;
+    }
+
+    /* Outer container for background */
+    .outer-container {
+        max-width: 1440px; /* Increased container width */
+        background-color: #ffffff;
+        padding: 50px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Icon Styles */
+    .icon {
+        font-size: 3rem;
+    }
+
+    /* Info Card Styling */
+    .info-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Table and Button Styles */
+    table {
+        width: 100%;
+    }
+
+    th, td {
+        padding: 12px;
+    }
+
+    th {
         background-color: #f8f9fa;
         color: #333;
     }
 
-    .container {
-        margin-top: 20px;
-    }
-
-    .dashboard-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 0.5rem;
-    }
-
-    .btn-deactivate {
-        border-radius: 12px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        padding: 4px 11px;
-    }
-
-    .btn-download {
-        background-color: #007bff;
-        color: white;
-        padding: 0.6rem 1.2rem;
-        border-radius: 4px;
-        font-size: 1.1rem;
-        transition: background-color 0.3s ease;
-    }
-
-        .btn-download:hover {
-            background-color: #0056b3;
-            text-decoration: none;
-        }
-
-        .btn-download i {
-            margin-right: 10px;
-        }
-
-    .info-card {
-        display: flex;
-        align-items: center;
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        padding: 20px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-
-        .info-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .info-card .icon {
-            font-size: 3rem;
-            color: #007bff;
-            margin-right: 20px;
-        }
-
-    .info-text h5 {
-        font-size: 1.8rem;
-        margin: 0;
-        font-weight: bold;
-    }
-
-    .info-text p {
-        margin: 0;
-        color: #6c757d;
-    }
-
-    .transaction-table {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        padding: 20px;
-    }
-
-    .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-        .table-header h3 {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 12px 15px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #007bff;
-        color: white;
-        font-weight: bold;
-    }
-
     td {
-        color: #555;
+        color: #333;
     }
 
     tr:hover {
         background-color: #f1f1f1;
     }
 
+    /* Badge Styles */
     .badge {
         font-size: 0.9rem;
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
+        padding: 0.5rem 1rem;
+        border-radius: 15px;
         font-weight: 600;
     }
 
-    /* Hover Effect for Shadows */
-    .shadow-hover {
-        transition: box-shadow 0.3s ease;
+    /* Button Hover Effect */
+    .btn:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
     }
 
-        .shadow-hover:hover {
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        }
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
 
-    /* Responsive styles */
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    /* Responsive Styles */
     @@media (max-width: 768px) {
         .info-card {
-            flex-direction: column;
             text-align: center;
-        }
-
-            .info-card .icon {
-                margin-bottom: 10px;
-            }
-
-        .info-text h5 {
-            font-size: 1.5rem;
         }
     }
 </style>

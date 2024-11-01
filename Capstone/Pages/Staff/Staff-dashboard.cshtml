@@ -84,6 +84,8 @@
                             <tr>
                                 <th>Transaction Number</th>
                                 <th>Wiiband</th>
+                                <th>Customer Name</th> <!-- New Column -->
+                                <th>Email</th>          <!-- New Column -->
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
@@ -93,22 +95,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var transaction in Model.Transactions)
+                        @if (Model.DashboardEntries != null && Model.DashboardEntries.Count > 0)
+                            
+                            @foreach (var entry in Model.DashboardEntries)
                             {
-                              <tr>
-                                  <td>@transaction.TransactionNumber</td>
-                                  <td>@transaction.Wiiband</td>
-                                  <td>@transaction.StartTime</td>
-                                  <td>@transaction.EndTime</td>
-                                  <td>@transaction.RemainingTime</td>
-                                  <td>
-                                      <span class="badge @(transaction.Status == "Online" ? "bg-success" : transaction.Status == "Offline" ? "bg-danger" : "bg-secondary")">
-                                  @transaction.Status
-                                      </span>
-                                  </td>
-                                  <td><span class="btn btn-deactivate bg-black text-white">Deactivate</span></td>
-                              </tr>
-                            }
+                                  <tr>
+                                  <td>@entry.TransactionNumber</td>
+                                  <td>@entry.WiibandID</td>
+                                  <td>@entry.CustomerName</td>  <!-- New Field -->
+                                  <td>@entry.Email</td>          <!-- New Field -->
+                                  <td>@entry.StartTime?.ToString(@"hh\:mm")</td>
+                                  <td>@entry.EndTime?.ToString(@"hh\:mm")</td>
+                                  <td>@entry.RemainingTime</td>
+                                  <td>@entry.Status</td>
+                                  <td>@entry.BatteryLevel?.ToString("0.##")%</td>
+                                  </tr>
+                             }
                         </tbody>
                     </table>
                 </div>
@@ -117,7 +119,6 @@
     </div>
 </div>
 
-<!-- SignalR and Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -130,37 +131,35 @@
 
     // Establish a connection to the SignalR hub
     const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/StaffDashboardHub")
+        .withUrl("/StaffDashboardHub")  // Make sure the URL matches the one mapped in Startup.cs
         .build();
+  
+     // Function to handle incoming registration updates
+        connection.on("ReceiveRegistrationUpdate", function (data) {
+            const tableBody = document.querySelector("#transactionTable tbody");
 
-   // Function to handle incoming registration updates
-    connection.on("ReceiveRegistrationUpdate", function (data) {
-    const tableBody = document.querySelector("#transactionTable tbody");
+            // Create a new row for the transaction
+            const row = document.createElement("tr");
 
-    // Create a new row for the transaction
-    const row = document.createElement("tr");
+            // Populate the new row with transaction details
+            row.innerHTML = `
+                <td>${data.TransactionNumber}</td>
+                <td>${data.WiibandID || 'N/A'}</td>
+                <td>${data.CustomerName || 'N/A'}</td>
+                <td>${data.Email || 'N/A'}</td>
+                <td>${data.StartTime || 'N/A'}</td>
+                <td>${data.EndTime || 'N/A'}</td>
+                <td>${data.RemainingTime || 'N/A'}</td>
+                <td>${data.Status || 'N/A'}</td>
+                <td>${data.BatteryLevel || 'N/A'}%</td>
+            `;
 
-    // Populate the new row with transaction details
-    row.innerHTML = `
-        <td>${data.TransactionNumber}</td>
-        <td>${data.Wiiband || 'N/A'}</td>
-        <td>${data.StartTime || 'N/A'}</td>
-        <td>${data.EndTime || 'N/A'}</td>
-        <td>${data.RemainingTime || 'N/A'}</td>
-        <td>
-            <span class="badge ${data.Status === 'Active' ? 'bg-success' : data.Status === 'Inactive' ? 'bg-danger' : 'bg-secondary'}">
-                ${data.Status}
-            </span>
-        </td>
-        <td>${data.Battery || 'N/A'}</td>
-    `;
+            // Append the new row to the table body
+            tableBody.appendChild(row);
+        });
 
-    // Append the new row to the table body
-    tableBody.appendChild(row);
-});
-
-    // Start the SignalR connection
-    connection.start().catch(function (err) {
+        // Start the SignalR connection
+        connection.start().catch(function (err) {
         return console.error(err.toString());
     });
 </script>
