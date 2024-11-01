@@ -32,19 +32,38 @@ namespace Capstone.Pages.Staff
         public int Jumpers { get; set; }
         [BindProperty]
         public int Socks { get; set; }
-        public string? Addons { get; set; }
+        [BindProperty]
+        public bool EInvitation { get; set; }
+        [BindProperty]
+        public bool GameCoach { get; set; }
+        [BindProperty]
+        public bool WaterBottle { get; set; }
+        [BindProperty]
+        public bool MelonaIC { get; set; }
+        [BindProperty]
+        public List<string> Addons { get; set; } = new();
+        [BindProperty]
         public int TrampolineGames { get; set; }
+        [BindProperty]
         public int PartyGuest { get; set; }
+        [BindProperty]
         public int PartyHours { get; set; }
-        public int PartyDecorations { get; set; }
+        [BindProperty]
+        public string? PartyDecorations { get; set; }
+        [BindProperty]
         public int ElecFoodCart { get; set; }
+        [BindProperty]
         public int PartyEquipCD { get; set; }
+        [BindProperty]
         public int PartyEquipUtils { get; set; }
+        [BindProperty]
         public DateTime Created_at { get; set; }
-
+        [BindProperty]
+        public string? AddonsData { get; set; }
+        [BindProperty]
         public List<EventModel> UpcomingEvents { get; set; }
+        [BindProperty]
         public string? CalendarEventsJson { get; set; }
-
         public class EventModel
         {
             public string? Name { get; set; }
@@ -53,6 +72,7 @@ namespace Capstone.Pages.Staff
             public TimeSpan Time { get; set; }
             public int Duration { get; set; }
             public int Jumpers { get; set; }
+            public string? AddonsData { get; set; }
         }
 
         public void OnGet()
@@ -62,7 +82,7 @@ namespace Capstone.Pages.Staff
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = @"SELECT Name, Email, Date, Time, Duration, Jumpers FROM Events";
+                string query = @"SELECT Name, Email, Date, Time, Duration, Jumpers, Addons FROM Events";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     connection.Open();
@@ -70,26 +90,91 @@ namespace Capstone.Pages.Staff
                     {
                         while (reader.Read())
                         {
+                            DateTime date = reader.GetDateTime(reader.GetOrdinal("Date"));
+                            TimeSpan time = (TimeSpan)reader["Time"];
+                            int duration = (int)reader["Duration"];
+                            int jumpers = (int)reader["Jumpers"];
+
+                            // Here, add logic to determine selected addons
+                            List<string> Addons = new List<string>();
+
+                            // Assuming you have some conditions to check if add-ons were selected
+                            bool EInvitation = true; // Replace with actual condition
+                            bool GameCoach = false; // Replace with actual condition
+                            bool WaterBottle = true; // Replace with actual condition
+                            bool MelonaIC = false; // Replace with actual condition
+
+                            if (EInvitation) Addons.Add("E-Invitation");
+                            if (GameCoach) Addons.Add("Game Coach");
+                            if (WaterBottle) Addons.Add("Water Bottle");
+                            if (MelonaIC) Addons.Add("Melona Ice Cream");
+
+                            // Concatenate selected Addons into a single string before saving
+                            string addonsData = Addons.Any() ? string.Join(", ", Addons) : "Null";
+
+                            // Calculate start and end times
+                            string starttime = time.ToString(@"hh\:mm");
+                            string endtime = time.Add(TimeSpan.FromHours(duration)).ToString(@"hh\:mm");
+
                             UpcomingEvents.Add(new EventModel
                             {
                                 Name = reader["Name"].ToString(),
                                 Email = reader["Email"].ToString(),
-                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                                Time = (TimeSpan)reader["Time"],
-                                Duration = (int)reader["Duration"],
-                                Jumpers = (int)reader["Jumpers"]
+                                Date = date,
+                                Time = time,
+                                Duration = duration,
+                                Jumpers = jumpers,
+                                AddonsData = addonsData // Store the concatenated string
                             });
                         }
                     }
                 }
             }
 
-            // Convert to JSON for FullCalendar
-            CalendarEventsJson = JsonConvert.SerializeObject(UpcomingEvents);
+            // Transform UpcomingEvents to match FullCalendar's structure
+            var calendarEvents = UpcomingEvents.Select(e => new
+            {
+                title = e.Name,
+                start = e.Date.ToString("yyyy-MM-dd"), // Only the date part
+                starttime = e.Time.ToString(@"hh\:mm"), // Format as HH:mm
+                endtime = e.Time.Add(TimeSpan.FromHours(e.Duration)).ToString(@"hh\:mm"), // Calculate endtime
+                extendedProps = new
+                {
+                    email = e.Email,
+                    duration = e.Duration,
+                    jumpers = e.Jumpers,
+                    addons = e.AddonsData // Use the concatenated string
+                }
+            });
+
+            CalendarEventsJson = JsonConvert.SerializeObject(calendarEvents);
         }
+
 
         public IActionResult OnPost()
         {
+            if (EInvitation) Addons.Add("E-Invitation");
+            if (GameCoach) Addons.Add("Game Coach");
+            if (WaterBottle) Addons.Add("Water Bottle");
+            if (MelonaIC) Addons.Add("Melona Ice Cream");
+            // Concatenate selected Addons into a single string before saving
+            if (Addons != null && Addons.Any())
+            {
+                AddonsData = string.Join(", ", Addons); // Join list into a single string
+            }
+            else
+            {
+                AddonsData = "Null";
+            }
+            if (!Request.Form.ContainsKey("partyDecorations"))
+            {
+                PartyDecorations = null;
+            }
+            if (!Request.Form.ContainsKey("ElecFoodCart"))
+            {
+                ElecFoodCart = 0;
+            }
+
             string? connectionString = _configuration.GetConnectionString("DefaultConnection");
             if (string.IsNullOrEmpty(connectionString))
             {
@@ -100,22 +185,22 @@ namespace Capstone.Pages.Staff
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = @"INSERT INTO Events 
-                            (Name, Email, Phone, Date, Time, Duration, Jumpers, Socks, Addons, TrampolineGames,
-                             PartyGuest, PartyHours, PartyDecorations, ElecFoodCart, PartyEquipCD, PartyEquipUtils, Created_at)
-                             VALUES (@Name, @Email, @Phone, @Date, @Time, @Duration, @Jumpers, @Socks, @Addons, @TrampolineGames,
-                             @PartyGuest, @PartyHours, @PartyDecorations, @ElecFoodCart, @PartyEquipCD, @PartyEquipUtils, @Created_at)";
+                        (Name, Email, Phone, Date, Time, Duration, Jumpers, Socks, Addons, TrampolineGames,
+                         PartyGuest, PartyHours, PartyDecorations, ElecFoodCart, PartyEquipCD, PartyEquipUtils, Created_at)
+                         VALUES (@Name, @Email, @Phone, @Date, @Time, @Duration, @Jumpers, @Socks, @Addons, @TrampolineGames,
+                         @PartyGuest, @PartyHours, @PartyDecorations, @ElecFoodCart, @PartyEquipCD, @PartyEquipUtils, @Created_at)";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@Name", Name);
-                    command.Parameters.AddWithValue("@Email", Email);
+                    command.Parameters.AddWithValue("@Name", Name ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Email", Email ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@Phone", Phone);
                     command.Parameters.AddWithValue("@Date", Date == DateOnly.MinValue ? (object)DBNull.Value : Date);
                     command.Parameters.AddWithValue("@Time", Time == TimeOnly.MinValue ? (object)DBNull.Value : Time);
                     command.Parameters.AddWithValue("@Duration", Duration);
                     command.Parameters.AddWithValue("@Jumpers", Jumpers);
                     command.Parameters.AddWithValue("@Socks", Socks);
-                    command.Parameters.AddWithValue("@Addons", Addons ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Addons", AddonsData ?? (object)DBNull.Value);
                     command.Parameters.AddWithValue("@TrampolineGames", TrampolineGames);
                     command.Parameters.AddWithValue("@PartyGuest", PartyGuest);
                     command.Parameters.AddWithValue("@PartyHours", PartyHours);

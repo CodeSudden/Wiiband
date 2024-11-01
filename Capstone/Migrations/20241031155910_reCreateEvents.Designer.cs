@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241031030727_createdatevent")]
-    partial class createdatevent
+    [Migration("20241031155910_reCreateEvents")]
+    partial class reCreateEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -94,8 +94,8 @@ namespace Capstone.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PartyDecorations")
-                        .HasColumnType("int");
+                    b.Property<string>("PartyDecorations")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PartyEquipCD")
                         .HasColumnType("int");

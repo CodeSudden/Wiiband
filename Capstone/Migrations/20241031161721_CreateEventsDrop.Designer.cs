@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241030021400_AddCustomerTable")]
-    partial class AddCustomerTable
+    [Migration("20241031161721_CreateEventsDrop")]
+    partial class CreateEventsDrop
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,14 +33,14 @@ namespace Capstone.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Customer_email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Customer_name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Date_created")
-                        .HasColumnType("int");
 
                     b.Property<int>("Discount")
                         .HasColumnType("int");
@@ -60,6 +60,70 @@ namespace Capstone.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("Capstone.Data.Events", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Addons")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created_at")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ElecFoodCart")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Jumpers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PartyDecorations")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PartyEquipCD")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartyEquipUtils")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartyGuest")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PartyHours")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Phone")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Socks")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("Time")
+                        .HasColumnType("time");
+
+                    b.Property<int>("TrampolineGames")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("Capstone.Data.Users", b =>
