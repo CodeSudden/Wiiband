@@ -6,7 +6,7 @@ using Capstone.Data;
 namespace Capstone.Pages.Staff
 {
     public class WiibandModel : PageModel
-    {
+    {/*
         private readonly IConfiguration _configuration;
 
         public WiibandModel(IConfiguration configuration)
@@ -99,7 +99,7 @@ namespace Capstone.Pages.Staff
             }
 
             return RedirectToPage("Success"); // Redirect to a success page
-        }
+        }*/
     }
 
 }

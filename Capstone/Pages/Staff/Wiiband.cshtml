@@ -7,15 +7,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
+<!--
 <div class="container mt-5">
     <div class="card shadow-sm form-container rounded-4">
         <div class="card-body p-4">
             <h1 class="text-center mb-4">Customer</h1>
-            <form method="post" id="registrationForm">
+            <form method="post" id="registrationForm">-->
 
-                <!-- Customer Information -->
+                <!-- Customer Information 
                 <div class="mb-4">
                     <label asp-for="CustomerName" class="form-label"> Name</label>
                     <input type="text" asp-for="CustomerName" class="form-control rounded-pill" required />
@@ -24,15 +23,15 @@
                 <div class="mb-4">
                     <label asp-for="Email" class="form-label">Email</label>
                     <input type="email" asp-for="Email" class="form-control rounded-pill" required />
-                    <span asp-validation-for="Email" class="text-danger"></span>
+                        <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="mb-4">
                     <label asp-for="NumberOfJumpers" class="form-label">Number of Jumpers</label>
                     <input type="number" asp-for="NumberOfJumpers" class="form-control rounded-pill" min="1" required />
                     <span asp-validation-for="NumberOfJumpers" class="text-danger"></span>
-                </div>
+                </div>-->
 
-                <!-- Promo Options -->
+                <!-- Promo Options
                 <div class="mb-4">
                     <label asp-for="SelectedPromo" class="form-label">Promo</label>
                     <select asp-for="SelectedPromo" class="form-select rounded-pill" id="SelectedPromo" required>
@@ -44,43 +43,43 @@
                         <option value="open">Open Time for Multipass (No Charge)</option>
                     </select>
                     <span asp-validation-for="SelectedPromo" class="text-danger"></span>
-                </div>
+                </div>-->
 
-                <!-- Discount Options -->
+                <!-- Discount Options
                 <div class="mb-4 form-check">
                     <input type="checkbox" asp-for="DiscountPWD" class="form-check-input" id="DiscountPWD" />
                     <label asp-for="DiscountPWD" class="form-check-label ms-2">Discount (PWD)</label>
-                </div>
+                </div>-->
 
-                <!-- Number of Discounts (Hidden initially) -->
+                <!-- Number of Discounts (Hidden initially)
                 <div class="mb-4" id="discountsSection" style="display: none;">
                     <label asp-for="NumberOfDiscounts" class="form-label">Number of Discount(s)</label>
                     <input type="number" asp-for="NumberOfDiscounts" class="form-control rounded-pill" min="0" value="0" />
                     <span asp-validation-for="NumberOfDiscounts" class="text-danger"></span>
-                </div>
+                </div>-->
 
-                <!-- Total Amount -->
+                <!-- Total Amount
                 <div class="mb-4">
                     <label for="TotalAmount" class="form-label">Total Amount</label>
-                    <input type="text" id="TotalAmount" class="form-control rounded-pill" readonly value="@Model.TotalAmount" />
-                </div>
+                    <input type="text" id="TotalAmount" class="form-control rounded-pill" readonly value="Model.TotalAmount" />
+                </div>-->
 
-                <!-- Waiver Form Modal Trigger -->
+                <!-- Waiver Form Modal Trigger
                 <button type="button" class="btn btn-outline-primary rounded-pill w-100 mb-4" data-bs-toggle="modal" data-bs-target="#waiverModal">
                     View and Sign Waiver
-                </button>
+                </button>-->
 
-                <!-- Register Button -->
+                <!-- Register Button 
                 <button type="button" class="btn btn-primary rounded-pill w-100" id="registerBtn" disabled onclick="openScannerModal()">Register</button>
             </form>
         </div>
     </div>
-</div>
+</div>-->
 
-<!-- Waiver Modal -->
+<!-- Waiver Modal
 <div class="modal fade" id="waiverModal" tabindex="-1" aria-labelledby="waiverModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <!-- Larger size for waiver agreement modal -->
+    <div class="modal-dialog modal-dialog-centered modal-lg"> -->
+        <!-- Larger size for waiver agreement modal 
         <div class="modal-content rounded-3 p-4">
             <h5 class="modal-title text-center mb-3" id="waiverModalLabel">Waiver Agreement</h5>
             <div class="modal-body">
@@ -92,7 +91,7 @@
                     <li><strong>Lost or Damaged Wristband:</strong> In the event that my wristband is lost or damaged, I agree to notify WiiJUMP staff immediately. I understand that there may be a replacement fee for lost or damaged wristbands.</li>
                     <li><strong>Liability Release:</strong> I hereby release and hold harmless WiiJUMP Trampoline Park, its owners, employees, and agents from any and all claims, liabilities, or damages arising from the loss or damage of my wristband.</li>
                     <li><strong>Acknowledgment of Terms:</strong> I have read and understood the terms of this waiver and agree to abide by them.</li>
-                </ul>
+                </ul>-->
 
                 <!-- Terms and Conditions Checkbox -->
                 <div class="form-check mb-3">
