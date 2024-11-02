@@ -22,7 +22,8 @@ namespace Capstone.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Capstone.Data.Customers", b =>
+
+            modelBuilder.Entity("Capstone.Data.Customer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -130,7 +131,6 @@ namespace Capstone.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<DateTime>("Created_at")
                         .HasColumnType("datetime2");
 

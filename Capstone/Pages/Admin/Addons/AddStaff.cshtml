@@ -1,0 +1,59 @@
+﻿@page
+@model Capstone.Pages.Admin.Addons.AddStaffModel
+@{
+    ViewData["Title"] = "Add New Staff";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Create New Access Account</h2>
+
+    <form method="post">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" name="Name" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="accessLevel" class="form-label">Access Level</label>
+            <select id="accessLevel" name="AccessLevel" class="form-select" required>
+                <option value="">Select Access Level</option>
+                <option value="Admin">Admin</option>
+                <option value="Staff">Staff</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="Username" class="form-label">Username</label>
+            <input type="text" id="username" name="Username" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="Password" class="form-label">Password</label>
+            <input type="text" id="password" name="Password" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="contactNumber" class="form-label">Contact Number</label>
+            <input type="text" id="contactNumber" name="ContactNumber" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="shift" class="form-label">Shift</label>
+            <input type="text" id="shift" name="Shift" class="form-control" placeholder="e.g., 9 AM - 5 PM" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Create Account</button>
+        <a asp-page="/Admin/Staff" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+
+
+<!-- Styles can be customized here -->
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .btn {
+        min-width: 120px;
+    }
+</style>
