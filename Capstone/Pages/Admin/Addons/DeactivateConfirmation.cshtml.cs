@@ -37,13 +37,13 @@ namespace Capstone.Pages.Admin.Addons
             }
 
             // Perform deactivation logic
-            var transaction = await _context.Dashboard.FirstOrDefaultAsync(t => t.TransactionNumber == TransactionNumber);
+            /*var transaction = await _context.Dashboard.FirstOrDefaultAsync(t => t.TransactionNumber == TransactionNumber);
             if (transaction != null)
             {
                 // Assuming you're using a Status field to track deactivation
                 transaction.Status = "Deactivated";  // or whatever status you want to set
                 await _context.SaveChangesAsync();
-            }
+            }*/
 
             // Redirect back to the dashboard after deactivation
             return RedirectToPage("/Admin/Admin_Dashboard");

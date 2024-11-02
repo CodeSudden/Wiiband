@@ -16,7 +16,7 @@ namespace Capstone.Pages.Staff
         public void OnGet()
         {
             // Simulate getting data from the database
-            DashboardEntries = _context.Dashboard.ToList();
+            //DashboardEntries = _context.Dashboard.ToList();
         }
 
         private readonly ApplicationDbContext _context;

@@ -15,7 +15,7 @@ namespace Capstone.Pages.Staff
     {
         private readonly IConfiguration _configuration;
 
-        // Constructor where both _context and _hubContext are injected
+        /* Constructor where both _context and _hubContext are injected
         public WiibandModel(ApplicationDbContext context, IHubContext<StaffDashboardHub> hubContext)
         {
             _configuration = configuration;
@@ -41,8 +41,6 @@ namespace Capstone.Pages.Staff
 
         [BindProperty, Range(0, int.MaxValue, ErrorMessage = "Please enter a valid number of discounts.")]
         public int NumberOfDiscounts { get; set; } = 0;
-
-        public decimal TotalAmount { get; set; }
 
         [BindProperty]
         public int WiibandID { get; set; }
@@ -175,7 +173,7 @@ namespace Capstone.Pages.Staff
                     Console.WriteLine(error.ErrorMessage); // Log errors for debugging
                 }
             }
-        }
+        }*/
     }
 
 }
