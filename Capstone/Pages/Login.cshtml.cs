@@ -1,53 +1,57 @@
 using Capstone.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Linq;
 
-namespace Capstone.Pages // Ensure this namespace matches your project structure
+namespace Capstone.Pages
 {
     public class LoginModel : PageModel
     {
-        [BindProperty]
-        public string Username { get; set; }
+        private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        [BindProperty]
-        public string Password { get; set; }
-
-        public string ErrorMessage { get; set; }
-
-        public IActionResult OnPost() // This method must have a return type
+        public LoginModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
-            // Staff credentials
-            const string staffUsername = "staff";
-            const string staffPassword = "staff123";
+            _context = context;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
-            // Admin credentials
-            const string adminUsername = "admin";
-            const string adminPassword = "admin123";
+        [BindProperty]
+        public required string Username { get; set; }
 
-            // Authentication Logic
-            if (Username == staffUsername && Password == staffPassword)
+        [BindProperty]
+        public required string Password { get; set; }
+
+        public string? ErrorMessage { get; set; }
+
+        public IActionResult OnPost()
+        {
+            var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
+
+            if (user != null)
             {
-                // Store the login success flag and redirect URL in TempData
-                TempData["LoginSuccess"] = true;
-                TempData["RedirectUrl"] = Url.Page("/Staff/Staff-Dashboard");
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    _httpContextAccessor.HttpContext.Session.SetString("Type", user.Type);
+                    _httpContextAccessor.HttpContext.Session.SetString("UserName", user.Username);
+                    _httpContextAccessor.HttpContext.Session.SetInt32("UserId", user.Id);
+                }
 
-                return RedirectToPage(); // Correct return type
+                if (user.Type == "Admin")
+                {
+                    TempData["LoginSuccess"] = true;
+                    return RedirectToPage("/Admin/Admin-Dashboard");
+                }
+                else if (user.Type == "Staff")
+                {
+                    TempData["LoginSuccess"] = true;
+                    return RedirectToPage("/Staff/Staff-Dashboard");
+                }
             }
-            else if (Username == adminUsername && Password == adminPassword)
-            {
-                // Store the login success flag and redirect URL in TempData
-                TempData["LoginSuccess"] = true;
-                TempData["RedirectUrl"] = Url.Page("/Admin/Admin-Dashboard");
 
-                return RedirectToPage(); // Correct return type
-            }
-            else
-            {
-                // If credentials are invalid, show an error message
-                ErrorMessage = "Invalid username or password";
-                return Page(); // Correct return type
-            }
+            ErrorMessage = "Invalid username or password";
+            return Page();
         }
     }
 }

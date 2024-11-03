@@ -36,7 +36,7 @@
                         <i class="bi bi-cash-coin kpi-icon me-3"></i>
                         <div>
                             <h5 class="kpi-title mb-1">Total Sales</h5>
-                            <h3 class="kpi-value mb-0">₱120,000</h3>
+                            <h3 class="kpi-value mb-0">@Model.TotalSales.ToString("C")</h3>
                         </div>
                     </div>
                 </div>
@@ -126,6 +126,11 @@
             }
         });
 
+        var dailySales = @Model.DailySales;
+        var weeklySales = @Model.WeeklySales;
+        var monthlySales = @Model.MonthlySales;
+        var yearlySales = @Model.YearlySales;
+
         var ctxSales = document.getElementById('salesChart').getContext('2d');
         var salesChart = new Chart(ctxSales, {
             type: 'bar',
@@ -133,7 +138,7 @@
                 labels: ['Daily Sales', 'Weekly Sales', 'Monthly Sales', 'Yearly Sales'],
                 datasets: [{
                     label: 'Sales (₱)',
-                    data: [5000, 35000, 150000, 1800000],
+                    data: [dailySales, weeklySales, monthlySales, yearlySales],
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',

@@ -9,21 +9,34 @@ namespace Capstone.Pages.Staff
 {
     public class Staff_dashboardModel : PageModel
     {
+        private readonly ApplicationDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public List<Transaction> Transactions { get; set; }
         [BindProperty(SupportsGet = true)]
         public string StatusFilter { get; set; }
+        public decimal TotalSalesToday { get; private set; }
 
         public void OnGet()
         {
-            // Simulate getting data from the database
-            //DashboardEntries = _context.Dashboard.ToList();
+            var Type = _httpContextAccessor.HttpContext?.Session.GetString("Type");
+            var userName = _httpContextAccessor.HttpContext?.Session.GetString("UserName");
+            var userId = _httpContextAccessor.HttpContext?.Session.GetInt32("UserId");
+
+            if (userName == null || userId == null || Type == "staff")
+            {
+                Response.Redirect("/Login");
+            }
+
+            TotalSalesToday = _context.GetTotalSalesForToday();
+
+            Transactions = GetAllTransactions();
         }
 
-        private readonly ApplicationDbContext _context;
-
-        public Staff_dashboardModel(ApplicationDbContext context)
+        public Staff_dashboardModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public List<Dashboard> DashboardEntries { get; set; }
@@ -55,14 +68,14 @@ namespace Capstone.Pages.Staff
 
         public class Transaction
         {
-            public string TransactionNumber { get; set; }
-            public string Wiiband { get; set; }
-            public string StartTime { get; set; }
-            public string EndTime { get; set; }
-            public string RemainingTime { get; set; }
-            public string Status { get; set; }
-            public string Battery { get; set; }
-            public string Deactivate { get; set; }
+            public string? TransactionNumber { get; set; }
+            public string? Wiiband { get; set; }
+            public string? StartTime { get; set; }
+            public string? EndTime { get; set; }
+            public string? RemainingTime { get; set; }
+            public string? Status { get; set; }
+            public string? Battery { get; set; }
+            public string? Deactivate { get; set; }
         }
     }
 }

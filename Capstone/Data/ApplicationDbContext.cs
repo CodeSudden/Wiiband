@@ -9,7 +9,43 @@ namespace Capstone.Data // Replace with your actual namespace if different
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-        
+        public decimal GetTotalSales()
+        {
+            return Customers.Sum(c => c.Total_amount);
+        }
+
+        public decimal GetTotalSalesForToday()
+        {
+            var today = DateTime.Today;
+            return Customers
+                .Where(c => c.Created_at.Date == today)
+                .Sum(c => c.Total_amount);
+        }
+
+        public decimal GetWeeklySales()
+        {
+            var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+            return Customers
+                .Where(c => c.Created_at >= startOfWeek)
+                .Sum(c => c.Total_amount);
+        }
+
+        public decimal GetMonthlySales()
+        {
+            var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            return Customers
+                .Where(c => c.Created_at >= startOfMonth)
+                .Sum(c => c.Total_amount);
+        }
+
+        public decimal GetYearlySales()
+        {
+            var startOfYear = new DateTime(DateTime.Today.Year, 1, 1);
+            return Customers
+                .Where(c => c.Created_at >= startOfYear)
+                .Sum(c => c.Total_amount);
+        }
+
         /* DbSets for your entities
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Staff> Staff { get; set; }
@@ -59,12 +95,27 @@ namespace Capstone.Data // Replace with your actual namespace if different
                 .Property(t => t.TotalAmount)
                 .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
         }*/
-
+        public DbSet<DashboardDisplay> Dashboards { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
     }
 
+    public class DashboardDisplay
+    {
+        public int Id { get; set; }
+        public required string TransactionNumber { get; set; }
+        public int WiibandID { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public required string RemainingTime { get; set; }
+        public required string Status { get; set; }
+        public decimal? BatteryLevel { get; set; }
+
+        // New properties for customer details
+        public required string CustomerName { get; set; }
+        public required string Email { get; set; }
+    }
     public class Users
     {
         public int Id { get; set; }

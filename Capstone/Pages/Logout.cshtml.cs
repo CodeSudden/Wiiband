@@ -6,14 +6,14 @@ namespace Capstone.Pages
     // Logout.cshtml.cs
     public class LogoutModel : PageModel
     {
-        //public IActionResult OnGet()
-        //{
-        //    // Perform any necessary cleanup, like clearing session data
-        //    HttpContext.Session.Clear();
+        public IActionResult OnGet()
+        {
+            // Clear the session to log the user out
+            HttpContext.Session.Clear();
 
-        //    // Redirect to the login page
-        //    return RedirectToPage("/Index");
-        //}
+            // Redirect to the login page
+            return RedirectToPage("/Login");
+        }
     }
 
 }
