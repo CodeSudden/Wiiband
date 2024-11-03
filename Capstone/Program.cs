@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone.Hubs;
 using Capstone.Data;
 using DotNetEnv;
+using Capstone;
 
 Env.Load();
 
@@ -25,6 +26,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add Stripe configuration and load it from appsettings.json or environment variables
 var stripeSettings = builder.Configuration.GetSection("Stripe");
 builder.Services.Configure<StripeSettings>(stripeSettings);
+// Register the UDP listener as a hosted service
+builder.Services.AddHostedService<UdpListenerService>();
 
 // Add SignalR service
 builder.Services.AddSignalR();

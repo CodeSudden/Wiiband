@@ -141,7 +141,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int Num_jumpers { get; set; }
         public int Promo { get; set; }
         public int Discount { get; set; }
-        public int Total_amount { get; set; }
+        public decimal Total_amount { get; set; }
         public string? SignatureData { get; set; }
         public DateTime Created_at { get; set; }
     }
