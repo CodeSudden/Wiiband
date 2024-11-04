@@ -34,6 +34,7 @@ namespace Capstone.Pages.Staff
 
         public void OnGet()
         {
+
         }
 
         public IActionResult OnPost()
@@ -55,8 +56,8 @@ namespace Capstone.Pages.Staff
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string sql = "INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, SignatureData) " +
-                             "VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @SignatureData)";
+                string sql = "INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, SignatureData, Created_at) " +
+                             "VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @SignatureData, @Created_at)";
 
                 using (SqlCommand command = new SqlCommand(sql, connection))
                 {
@@ -67,13 +68,14 @@ namespace Capstone.Pages.Staff
                     command.Parameters.AddWithValue("@Discount", DiscountPWD);
                     command.Parameters.AddWithValue("@Total_amount", TotalAmount);
                     command.Parameters.AddWithValue("@SignatureData", base64Signature);
-
+                    DateTime datenow = DateTime.Now;
+                    command.Parameters.AddWithValue("@Created_at", datenow);
                     connection.Open();
                     command.ExecuteNonQuery();
                 }
             }
 
-            return RedirectToPage("dashboard");
+            return RedirectToPage("Staff-Dashboard");
         }
 
     }

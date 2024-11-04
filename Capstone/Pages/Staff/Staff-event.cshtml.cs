@@ -99,10 +99,10 @@ namespace Capstone.Pages.Staff
                             List<string> Addons = new List<string>();
 
                             // Assuming you have some conditions to check if add-ons were selected
-                            bool EInvitation = true; // Replace with actual condition
-                            bool GameCoach = false; // Replace with actual condition
-                            bool WaterBottle = true; // Replace with actual condition
-                            bool MelonaIC = false; // Replace with actual condition
+                            bool EInvitation = true;
+                            bool GameCoach = false; 
+                            bool WaterBottle = true;
+                            bool MelonaIC = false; 
 
                             if (EInvitation) Addons.Add("E-Invitation");
                             if (GameCoach) Addons.Add("Game Coach");
@@ -124,7 +124,7 @@ namespace Capstone.Pages.Staff
                                 Time = time,
                                 Duration = duration,
                                 Jumpers = jumpers,
-                                AddonsData = addonsData // Store the concatenated string
+                                AddonsData = addonsData
                             });
                         }
                     }
@@ -135,15 +135,15 @@ namespace Capstone.Pages.Staff
             var calendarEvents = UpcomingEvents.Select(e => new
             {
                 title = e.Name,
-                start = e.Date.ToString("yyyy-MM-dd"), // Only the date part
-                starttime = e.Time.ToString(@"hh\:mm"), // Format as HH:mm
-                endtime = e.Time.Add(TimeSpan.FromHours(e.Duration)).ToString(@"hh\:mm"), // Calculate endtime
+                start = e.Date.ToString("yyyy-MM-dd"),
+                starttime = e.Time.ToString(@"hh\:mm"), 
+                endtime = e.Time.Add(TimeSpan.FromHours(e.Duration)).ToString(@"hh\:mm"),
                 extendedProps = new
                 {
                     email = e.Email,
                     duration = e.Duration,
                     jumpers = e.Jumpers,
-                    addons = e.AddonsData // Use the concatenated string
+                    addons = e.AddonsData
                 }
             });
 

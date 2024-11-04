@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone.Hubs;
 using Capstone.Data;
 using DotNetEnv;
+using Capstone;
 
 Env.Load();
 
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSession();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR(); // Add SignalR
 
@@ -24,6 +26,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add Stripe configuration and load it from appsettings.json or environment variables
 var stripeSettings = builder.Configuration.GetSection("Stripe");
 builder.Services.Configure<StripeSettings>(stripeSettings);
+// Register the UDP listener as a hosted service
+builder.Services.AddHostedService<UdpListenerService>();
 
 // Add SignalR service
 builder.Services.AddSignalR();
@@ -62,6 +66,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<GoogleCalendarService>();
 
 var app = builder.Build();
+
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

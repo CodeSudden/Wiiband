@@ -3,68 +3,129 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using Capstone.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace Capstone.Data // Replace with your actual namespace if different
 {
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-        
-        /* DbSets for your entities
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Staff> Staff { get; set; }
-        public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Dashboard> Dashboard { get; set; }
-        public DbSet<Registration> Registrations { get; set; }  // Add this line
-
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public decimal GetTotalSales()
         {
-            // Customer entity configuration
-            modelBuilder.Entity<Customer>()
-                .HasKey(c => c.Id);
+            return Customers.Sum(c => c.Total_amount);
+        }
 
-            modelBuilder.Entity<Customer>()
-                .Property(c => c.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+        public decimal GetTotalSalesForToday()
+        {
+            var today = DateTime.Today;
+            return Customers
+                .Where(c => c.Created_at.Date == today)
+                .Sum(c => c.Total_amount);
+        }
 
-            // Staff entity configuration
-            modelBuilder.Entity<Staff>()
-                .HasKey(s => s.StaffId);
+        public decimal GetWeeklySales()
+        {
+            var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+            return Customers
+                .Where(c => c.Created_at >= startOfWeek)
+                .Sum(c => c.Total_amount);
+        }
 
-            // WiibandRegistration entity configuration
-            modelBuilder.Entity<WiibandRegistration>()
-                .HasKey(w => w.Id);
+        public decimal GetMonthlySales()
+        {
+            var startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            return Customers
+                .Where(c => c.Created_at >= startOfMonth)
+                .Sum(c => c.Total_amount);
+        }
 
-            modelBuilder.Entity<WiibandRegistration>()
-                .HasOne(w => w.Staff)
-                .WithMany()
-                .HasForeignKey(w => w.StaffId);
+        public decimal GetYearlySales()
+        {
+            var startOfYear = new DateTime(DateTime.Today.Year, 1, 1);
+            return Customers
+                .Where(c => c.Created_at >= startOfYear)
+                .Sum(c => c.Total_amount);
+        }
 
-            modelBuilder.Entity<WiibandRegistration>()
-                .Property(w => w.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
 
-            // Transaction entity configuration
-            modelBuilder.Entity<Transaction>()
-                .HasKey(t => t.TransactionId);
+        public class ApplicationUser : IdentityUser
+        {
+            public string? Type { get; set; } 
+            public string? DisplayName { get; set; }
+        }
 
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.WiibandRegistration)
-                .WithMany()
-                .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
 
-            modelBuilder.Entity<Transaction>()
-                .Property(t => t.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
-        }*/
+    /* DbSets for your entities
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<Staff> Staff { get; set; }
+    public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Dashboard> Dashboard { get; set; }
+    public DbSet<Registration> Registrations { get; set; }  // Add this line
 
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Customer entity configuration
+        modelBuilder.Entity<Customer>()
+            .HasKey(c => c.Id);
+
+        modelBuilder.Entity<Customer>()
+            .Property(c => c.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+
+        // Staff entity configuration
+        modelBuilder.Entity<Staff>()
+            .HasKey(s => s.StaffId);
+
+        // WiibandRegistration entity configuration
+        modelBuilder.Entity<WiibandRegistration>()
+            .HasKey(w => w.Id);
+
+        modelBuilder.Entity<WiibandRegistration>()
+            .HasOne(w => w.Staff)
+            .WithMany()
+            .HasForeignKey(w => w.StaffId);
+
+        modelBuilder.Entity<WiibandRegistration>()
+            .Property(w => w.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+
+        // Transaction entity configuration
+        modelBuilder.Entity<Transaction>()
+            .HasKey(t => t.TransactionId);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.WiibandRegistration)
+            .WithMany()
+            .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
+
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+    }*/
+    public DbSet<DashboardDisplay> Dashboards { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
     }
 
+    public class DashboardDisplay
+    {
+        public int Id { get; set; }
+        public required string TransactionNumber { get; set; }
+        public int WiibandID { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public required string RemainingTime { get; set; }
+        public required string Status { get; set; }
+        public decimal? BatteryLevel { get; set; }
+
+        // New properties for customer details
+        public required string CustomerName { get; set; }
+        public required string Email { get; set; }
+    }
     public class Users
     {
         public int Id { get; set; }
@@ -78,6 +139,8 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public bool Visibility { get; set; }
         public bool Third_party {  get; set; }
         public string? Theme { get; set; }
+        public int ContactNum { get; set; }
+        public string? Shift { get; set; }
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }
     }
@@ -90,7 +153,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int Num_jumpers { get; set; }
         public int Promo { get; set; }
         public int Discount { get; set; }
-        public int Total_amount { get; set; }
+        public decimal Total_amount { get; set; }
         public string? SignatureData { get; set; }
         public DateTime Created_at { get; set; }
     }

@@ -1,11 +1,52 @@
 ﻿@page
 @model Capstone.Pages.TestconnectionModel
 @{
-    var googleClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
-
-    <p>@Model.Message</p>
+    ViewData["Title"] = "UDP Command Control";
 }
 
-<script>
-    console.log("Google Client ID: @googleClientId");
-</script>
+<h1>UDP Command Control</h1>
+
+<!-- Display the connection message -->
+<p>@Model.Message</p>
+
+<!-- Form to submit UDP commands -->
+<form id="udpForm" method="post">
+    @Html.AntiForgeryToken() <!-- Include anti-forgery token -->
+    <!-- Radio buttons for UDP commands -->
+    <div>
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,REDON" onclick="updateCommand('17 E7 29 66,REDON')" /> Button Red On
+        </label><br />
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,GREENON" onclick="updateCommand('17 E7 29 66,GREENON')" /> Button Green On
+        </label><br />
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,BLUEON" onclick="updateCommand('17 E7 29 66,BLUEON')" /> Button Blue On
+        </label><br />
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,YELLOWON" onclick="updateCommand('17 E7 29 66,YELLOWON')" /> Button Yellow On
+        </label><br />
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,BUZZER,500,10" onclick="updateCommand('17 E7 29 66,BUZZER,500,10')" /> Button Buzzer
+        </label><br />
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,VIBRATE" onclick="updateCommand('17 E7 29 66,VIBRATE')" /> Button Vibrate
+        </label>
+        <label>
+            <input type="radio" name="command" value="17 E7 29 66,ALLOFF" onclick="updateCommand('17 E7 29 66,ALLOFF')" /> Button ALL OFF
+        </label>
+    </div>
+
+    <!-- Text box to display the selected command -->
+    <input type="text" id="commandInput" name="commandInput" readonly />
+
+    <input type="submit" value="Send Command" />
+</form>
+
+@section Scripts {
+    <script>
+        function updateCommand(command) {
+            document.getElementById('commandInput').value = command; // Set the selected command in the text box
+        }
+    </script>
+}
