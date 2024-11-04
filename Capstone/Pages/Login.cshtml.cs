@@ -2,6 +2,7 @@ using Capstone.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Identity; // Make sure to include this namespace
 using System.Linq;
 
 namespace Capstone.Pages
@@ -10,11 +11,13 @@ namespace Capstone.Pages
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly PasswordHasher<object> _passwordHasher;
 
         public LoginModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _passwordHasher = new PasswordHasher<object>(); // Initialize the password hasher
         }
 
         [BindProperty]
@@ -27,26 +30,34 @@ namespace Capstone.Pages
 
         public IActionResult OnPost()
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
+            var user = _context.Users.SingleOrDefault(u => u.Username == Username);
 
             if (user != null)
             {
-                if (_httpContextAccessor.HttpContext != null)
-                {
-                    _httpContextAccessor.HttpContext.Session.SetString("Type", user.Type);
-                    _httpContextAccessor.HttpContext.Session.SetString("UserName", user.Username);
-                    _httpContextAccessor.HttpContext.Session.SetInt32("UserId", user.Id);
-                }
+                // Verify the password
+                var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(null, user.Password, Password);
 
-                if (user.Type == "Admin")
+                if (passwordVerificationResult == PasswordVerificationResult.Success)
                 {
-                    TempData["LoginSuccess"] = true;
-                    return RedirectToPage("/Admin/Admin-Dashboard");
-                }
-                else if (user.Type == "Staff")
-                {
-                    TempData["LoginSuccess"] = true;
-                    return RedirectToPage("/Staff/Staff-Dashboard");
+                    // Password is correct; set session variables
+                    if (_httpContextAccessor.HttpContext != null)
+                    {
+                        _httpContextAccessor.HttpContext.Session.SetString("Type", user.Type);
+                        _httpContextAccessor.HttpContext.Session.SetString("UserName", user.Username);
+                        _httpContextAccessor.HttpContext.Session.SetInt32("UserId", user.Id);
+                    }
+
+                    // Redirect based on user type
+                    if (user.Type == "Admin")
+                    {
+                        TempData["LoginSuccess"] = true;
+                        return RedirectToPage("/Admin/Admin-Dashboard");
+                    }
+                    else if (user.Type == "Staff")
+                    {
+                        TempData["LoginSuccess"] = true;
+                        return RedirectToPage("/Staff/Staff-Dashboard");
+                    }
                 }
             }
 
