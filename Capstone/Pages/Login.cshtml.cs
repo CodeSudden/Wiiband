@@ -43,10 +43,10 @@ namespace Capstone.Pages
                     TempData["LoginSuccess"] = true;
                     return RedirectToPage("/Admin/Admin-Dashboard");
                 }
-                else if (user.Type == "Staff")
+                else if (user.Type.Equals("staff", StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["LoginSuccess"] = true;
-                    return RedirectToPage("/Staff/Staff-Dashboard");
+                    return RedirectToPage("/Staff/Staff-dashboard");
                 }
             }
 

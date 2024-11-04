@@ -37,7 +37,7 @@ namespace Capstone.Pages.Admin
 
             // Load data
             IDataView dataView = mlContext.Data.LoadFromTextFile<AttendanceData>(
-                "C:/Users/RGBTQ/source/repos/Wiiband/Capstone/Dataset.csv",
+                "C:\\Users\\Tine Cacapit\\source\\repos\\WiibandSystem1\\Capstone\\Dataset.csv",
                 hasHeader: true,
                 separatorChar: ',');
 

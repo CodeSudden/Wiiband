@@ -1,0 +1,79 @@
+﻿@page
+@model Capstone.Pages.Staff.ControllerModel
+@{
+    ViewData["Title"] = "Controller";
+    Layout = "_StaffLayout";
+}
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="w-50">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-primary">UDP Command Control</h2>
+            <p class="text-muted">Select a command and send it via UDP.</p>
+        </div>
+
+        <form id="udpForm" method="post" class="border rounded-3 shadow-lg p-4 bg-white">
+            @Html.AntiForgeryToken() <!-- Include anti-forgery token -->
+            <!-- Radio buttons for UDP commands with enhanced styling -->
+            <div class="mb-4">
+                <h5 class="fw-normal mb-3 text-secondary">Select Command</h5>
+
+                <div class="d-grid gap-2">
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,REDON" onclick="updateCommand('17 E7 29 66,REDON')" />
+                        <span class="text-dark">Button Red On</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,GREENON" onclick="updateCommand('17 E7 29 66,GREENON')" />
+                        <span class="text-dark">Button Green On</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,BLUEON" onclick="updateCommand('17 E7 29 66,BLUEON')" />
+                        <span class="text-dark">Button Blue On</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,YELLOWON" onclick="updateCommand('17 E7 29 66,YELLOWON')" />
+                        <span class="text-dark">Button Yellow On</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,BUZZER,500,10" onclick="updateCommand('17 E7 29 66,BUZZER,500,10')" />
+                        <span class="text-dark">Button Buzzer</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,VIBRATE" onclick="updateCommand('17 E7 29 66,VIBRATE')" />
+                        <span class="text-dark">Button Vibrate</span>
+                    </label>
+
+                    <label class="form-check-label p-2 border rounded-3 bg-light">
+                        <input class="form-check-input me-2" type="radio" name="command" value="17 E7 29 66,ALLOFF" onclick="updateCommand('17 E7 29 66,ALLOFF')" />
+                        <span class="text-dark">Button ALL OFF</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Text box to display the selected command -->
+            <div class="mb-4">
+                <label for="commandInput" class="form-label text-secondary">Selected Command</label>
+                <input type="text" id="commandInput" name="commandInput" class="form-control border-0 bg-light" readonly />
+            </div>
+
+            <!-- Submit button with Bootstrap styling -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Send Command</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateCommand(command) {
+            document.getElementById('commandInput').value = command; // Set the selected command in the text box
+        }
+    </script>
+}
