@@ -12,9 +12,7 @@ namespace Capstone.Pages.Staff
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public List<DashboardDisplay> DashboardEntries { get; set; }
-
+        public List<Transactions> Transactions { get; set; } = new List<Transactions>();
         [BindProperty(SupportsGet = true)]
         public string StatusFilter { get; set; }
         public int Visitors { get; private set; }
@@ -40,48 +38,13 @@ namespace Capstone.Pages.Staff
             }
 
             TotalSalesToday = _context.GetTotalSalesForToday();
-
-            // Update visitors count in the Visitors table
-            _context.UpdateTransactionCountInVisitors();
-
-            TotalJumpers = _context.GetTotalJumpers();
-
-            // Set Visitors to the latest count from the Visitors table
-            Visitors = _context.GetTransactionCountFromVisitors();
-
-            // Filter transactions to include only those with today's date
-            var today = DateTime.Today;
-            DashboardEntries = _context.Transactions
-                .Where(t => t.Date.Date == today) // Ensure the date is today
-                .Select(t => new DashboardDisplay
-                {
-                    TransactionNumber = t.TransactionNumber,
-                    WiibandID = t.WiibandID,
-                    StartTime = t.StartTime,
-                    EndTime = t.EndTime,
-                    RemainingTime = t.RemainingTime,
-                    CustomerName = t.CustomerName,
-                    Email = t.Email
-                })
-                .ToList();
+            Transactions = _context.Transactions.ToList();
         }
 
-        public void OnPost()
+        public Staff_dashboardModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
-            var today = DateTime.Today;
-            DashboardEntries = _context.Transactions
-                .Where(t => (string.IsNullOrEmpty(StatusFilter) || t.Status == StatusFilter) && t.Date.Date == today) // Filter by date and status
-                .Select(t => new DashboardDisplay
-                {
-                    TransactionNumber = t.TransactionNumber,
-                    WiibandID = t.WiibandID,
-                    StartTime = t.StartTime,
-                    EndTime = t.EndTime,
-                    RemainingTime = t.RemainingTime,
-                    CustomerName = t.CustomerName,
-                    Email = t.Email
-                })
-                .ToList();
+            _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
     }
 }

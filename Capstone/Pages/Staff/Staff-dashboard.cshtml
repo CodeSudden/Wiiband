@@ -79,20 +79,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model.DashboardEntries != null && Model.DashboardEntries.Count > 0)
+                            @foreach (var transaction in Model.Transactions)
                             {
-                                @foreach (var entry in Model.DashboardEntries)
-                                {
-                                    <tr>
-                                        <td>@entry.TransactionNumber</td>
-                                        <td>@entry.WiibandID</td>
-                                        <td>@entry.CustomerName</td>
-                                        <td>@entry.Email</td>
-                                        <td>@entry.StartTime?.ToString(@"hh\:mm")</td>
-                                        <td>@entry.EndTime?.ToString(@"hh\:mm")</td>
-                                        <td>@entry.RemainingTime</td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td>@transaction.TransactionNumber</td>
+                                    <td>@transaction.WiibandID</td>
+                                    <td>@transaction.CustomerName</td>
+                                    <td>@transaction.Email</td>
+                                    <td>@transaction.StartTime?.ToString(@"hh\:mm")</td>
+                                    <td>@transaction.EndTime?.ToString(@"hh\:mm")</td>
+                                    <td>@transaction.RemainingTime</td>
+                                    <td>@transaction.Status</td>
+                                    <td>
+                                        <!-- Assuming deactivation is a link or button; otherwise, remove if not applicable -->
+                                        <a href="#" class="btn btn-danger btn-sm">Deactivate</a>
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>

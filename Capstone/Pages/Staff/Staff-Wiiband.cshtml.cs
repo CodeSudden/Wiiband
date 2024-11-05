@@ -56,27 +56,73 @@ namespace Capstone.Pages.Staff
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string sql = "INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, SignatureData, Created_at) " +
-                             "VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @SignatureData, @Created_at)";
+                connection.Open();
 
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                // Start a SQL transaction
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@Customer_name", CustomerName);
-                    command.Parameters.AddWithValue("@Customer_email", Email);
-                    command.Parameters.AddWithValue("@Num_jumpers", NumberOfJumpers);
-                    command.Parameters.AddWithValue("@Promo", SelectedPromo);
-                    command.Parameters.AddWithValue("@Discount", DiscountPWD);
-                    command.Parameters.AddWithValue("@Total_amount", TotalAmount);
-                    command.Parameters.AddWithValue("@SignatureData", base64Signature);
-                    DateTime datenow = DateTime.Now;
-                    command.Parameters.AddWithValue("@Created_at", datenow);
-                    connection.Open();
-                    command.ExecuteNonQuery();
+                    try
+                    {
+                        // Step 1: Insert Customer record
+                        string customerSql = @"
+                    INSERT INTO Customers (Customer_name, Customer_email, Num_jumpers, Promo, Discount, Total_amount, SignatureData, Created_at) 
+                    VALUES (@Customer_name, @Customer_email, @Num_jumpers, @Promo, @Discount, @Total_amount, @SignatureData, @Created_at);
+                    SELECT SCOPE_IDENTITY();";
+
+                        SqlCommand customerCommand = new SqlCommand(customerSql, connection, transaction);
+                        customerCommand.Parameters.AddWithValue("@Customer_name", CustomerName);
+                        customerCommand.Parameters.AddWithValue("@Customer_email", Email);
+                        customerCommand.Parameters.AddWithValue("@Num_jumpers", NumberOfJumpers);
+                        customerCommand.Parameters.AddWithValue("@Promo", SelectedPromo);
+                        customerCommand.Parameters.AddWithValue("@Discount", DiscountPWD);
+                        customerCommand.Parameters.AddWithValue("@Total_amount", TotalAmount);
+                        customerCommand.Parameters.AddWithValue("@SignatureData", base64Signature);
+                        DateTime datenow = DateTime.Now;
+                        customerCommand.Parameters.AddWithValue("@Created_at", datenow);
+
+                        // Execute customer insertion and get the new Customer ID
+                        int customerId = Convert.ToInt32(customerCommand.ExecuteScalar());
+
+                        // Step 2: Generate the next Transaction Number
+                        string transactionNumber;
+                        string transactionNumberSql = "SELECT COUNT(*) + 1 FROM Transactions";
+                        SqlCommand transactionNumberCommand = new SqlCommand(transactionNumberSql, connection, transaction);
+                        int nextTransactionNumber = (int)transactionNumberCommand.ExecuteScalar();
+                        transactionNumber = $"TRN-{nextTransactionNumber:D3}";
+
+                        // Step 3: Insert Transaction record
+                        string transactionSql = @"
+                    INSERT INTO Transactions (TransactionNumber, WiibandID, CustomerName, Email, Amount, Date, Status) 
+                    VALUES (@TransactionNumber, @WiibandID, @CustomerName, @Email, @Amount, @Date, @Status)";
+
+                        SqlCommand transactionCommand = new SqlCommand(transactionSql, connection, transaction);
+                        transactionCommand.Parameters.AddWithValue("@TransactionNumber", transactionNumber);
+                        transactionCommand.Parameters.AddWithValue("@WiibandID", customerId); // linking to the Customer ID
+                        transactionCommand.Parameters.AddWithValue("@CustomerName", CustomerName);
+                        transactionCommand.Parameters.AddWithValue("@Email", Email);
+                        transactionCommand.Parameters.AddWithValue("@Amount", TotalAmount);
+                        transactionCommand.Parameters.AddWithValue("@Date", datenow);
+                        transactionCommand.Parameters.AddWithValue("@Status", "Offline");
+
+                        transactionCommand.ExecuteNonQuery();
+
+                        // Commit transaction
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        // Rollback transaction if any error occurs
+                        transaction.Rollback();
+                        ModelState.AddModelError(string.Empty, "An error occurred while processing the transaction.");
+                        return Page();
+                    }
                 }
             }
 
             return RedirectToPage("Staff-Dashboard");
         }
+
+
 
     }
 

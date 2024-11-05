@@ -8,7 +8,6 @@
 <div class="container mt-5">
     <h2 class="mb-4">Staff Management</h2>
     <div class="mb-3">
-        <!-- Correct the routing to the AddStaff page -->
         <a asp-page="/Admin/Addons/AddStaff" class="btn btn-primary">Add New Staff</a>
     </div>
 
@@ -20,19 +19,21 @@
                         <th>Name</th>
                         <th>Access</th>
                         <th>Username</th>
+                        <th>Email</th>
                         <th>Contact Number</th>
                         <th>Shift</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var staff in Model.StaffMembers)
+                    @foreach (var staff in Model.StaffList)
                     {
                         <tr>
-                            <td>@staff.Name</td>
-                            <td>@staff.AccessLevel</td>
+                            <td>@staff.DisplayName</td>
+                            <td>@staff.Type</td> <!-- Assuming you want to show access level -->
                             <td>@staff.Username</td>
-                            <td>@staff.ContactNumber</td>
+                            <td>@staff.EmailAddress</td>
+                            <td>@staff.ContactNum</td>
                             <td>@staff.Shift</td>
                             <td>
                                 <a asp-page="/Admin/EditStaff" asp-route-id="@staff.Id" class="btn btn-outline-warning btn-sm">

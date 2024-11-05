@@ -11,11 +11,11 @@
     <form method="post">
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
-            <input type="text" id="name" name="Name" class="form-control" required />
+            <input type="text" id="name" asp-for="Display_name" class="form-control" required />
         </div>
         <div class="mb-3">
             <label for="accessLevel" class="form-label">Access Level</label>
-            <select id="accessLevel" name="AccessLevel" class="form-select" required>
+            <select id="accessLevel" asp-for="Type" class="form-select" required>
                 <option value="">Select Access Level</option>
                 <option value="Admin">Admin</option>
                 <option value="Staff">Staff</option>
@@ -23,24 +23,29 @@
         </div>
         <div class="mb-3">
             <label for="Username" class="form-label">Username</label>
-            <input type="text" id="username" name="Username" class="form-control" required />
+            <input type="text" id="username" asp-for="Username" class="form-control" required />
         </div>
         <div class="mb-3">
             <label for="Password" class="form-label">Password</label>
-            <input type="text" id="password" name="Password" class="form-control" required />
+            <input type="password" id="password" asp-for="Password" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="EmailAdd" class="form-label">Email Address</label>
+            <input type="email" id="EmailAdd" asp-for="Email_address" class="form-control" required />
         </div>
         <div class="mb-3">
             <label for="contactNumber" class="form-label">Contact Number</label>
-            <input type="text" id="contactNumber" name="ContactNumber" class="form-control" required />
+            <input type="text" id="contactNumber" asp-for="ContactNum" class="form-control" required />
         </div>
         <div class="mb-3">
             <label for="shift" class="form-label">Shift</label>
-            <input type="text" id="shift" name="Shift" class="form-control" placeholder="e.g., 9 AM - 5 PM" required />
+            <input type="text" id="shift" asp-for="Shift" class="form-control" placeholder="e.g., 9 AM - 5 PM" required />
         </div>
         <button type="submit" class="btn btn-primary">Create Account</button>
         <a asp-page="/Admin/Staff" class="btn btn-secondary ms-2">Cancel</a>
     </form>
 </div>
+
 
 
 <!-- Styles can be customized here -->
