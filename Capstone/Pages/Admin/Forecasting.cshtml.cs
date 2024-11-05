@@ -41,10 +41,11 @@ namespace Capstone.Pages.Admin
                 hasHeader: true,
                 separatorChar: ',');
 
-            int windowSize = 7;
-            int seriesLength = 30;
-            int trainSize = 90;
-            int horizon = 30;
+            // Set parameters for monthly forecasting
+            int windowSize = 3; // Looking back 3 months for trends
+            int seriesLength = 12; // Monthly data over a year
+            int trainSize = 36; // Training over 3 years of monthly data
+            int horizon = 12; // Forecasting the next 12 months
 
             // Forecasting pipeline for OverallPaxQty
             var paxQtyPipeline = mlContext.Forecasting.ForecastBySsa(
@@ -87,7 +88,8 @@ namespace Capstone.Pages.Admin
                 var forecastedPaxQty = forecastedPaxQtyData.First().ForecastedPaxQty[i];
                 var forecastedPaxAmount = forecastedPaxAmountData.First().ForecastedPaxAmount[i];
 
-                var forecastDate = lastDate.AddDays(i + 1); // Incrementing date for each forecasted value
+                // Incrementing date by month for each forecasted value
+                var forecastDate = lastDate.AddMonths(i + 1);
 
                 forecastedResults.Add(new ForecastedAttendanceWithDate
                 {
@@ -99,6 +101,7 @@ namespace Capstone.Pages.Admin
 
             return forecastedResults;
         }
+
         public class ForecastedAttendanceWithDate
         {
             public DateTime ForecastDate { get; set; }
