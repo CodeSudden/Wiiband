@@ -154,6 +154,62 @@ namespace Capstone
             }
         }
 
+        //private void SaveToDatabase(string tagId, string ipAddress, string scannerLoc)
+        //{
+        //    using SqlConnection connection = new SqlConnection(_connectionString);
+        //    connection.Open();
+
+        //    if (scannerLoc == "SCANNERCOUNTER")
+        //    {
+        //        // Check if there is an entry without an endtime
+        //        string checkQuery = @"
+        //    SELECT COUNT(*) FROM wiibandmonitor 
+        //    WHERE wiibandtag = @tagId AND endtime IS NULL";
+
+        //        using SqlCommand checkCmd = new SqlCommand(checkQuery, connection);
+        //        checkCmd.Parameters.AddWithValue("@tagId", tagId);
+        //        int openEntryCount = (int)checkCmd.ExecuteScalar();
+
+        //        // If there's no open entry, insert a new record
+        //        if (openEntryCount == 0)
+        //        {
+        //            string insertQuery = @"
+        //        INSERT INTO wiibandmonitor (wiibandtag, wiibandip, starttime)
+        //        VALUES (@tagId, @ipAddress, @starttime)";
+
+        //            using SqlCommand insertCmd = new SqlCommand(insertQuery, connection);
+        //            insertCmd.Parameters.AddWithValue("@tagId", tagId);
+        //            insertCmd.Parameters.AddWithValue("@ipAddress", ipAddress);
+        //            insertCmd.Parameters.AddWithValue("@starttime", DateTime.Now);
+
+
+        //            insertCmd.ExecuteNonQuery();
+        //            _logger.LogInformation("Inserted new entry with starttime for SCANNERCOUNTER.");
+        //        }
+        //    }
+        //    else if (scannerLoc == "SCANNEREXIT")
+        //    {
+        //        // Update the latest entry's endtime if it exists
+        //        string updateQuery = @"
+        //    UPDATE wiibandmonitor
+        //    SET endtime = @endtime
+        //    WHERE wiibandtag = @tagId AND endtime IS NULL";
+
+        //        using SqlCommand updateCmd = new SqlCommand(updateQuery, connection);
+        //        updateCmd.Parameters.AddWithValue("@tagId", tagId);
+        //        updateCmd.Parameters.AddWithValue("@endtime", DateTime.Now);
+
+        //        int rowsAffected = updateCmd.ExecuteNonQuery();
+        //        if (rowsAffected > 0)
+        //        {
+        //            _logger.LogInformation("Updated endtime for SCANNEREXIT.");
+        //        }
+        //        else
+        //        {
+        //            _logger.LogWarning("No open entry to update for SCANNEREXIT.");
+        //        }
+        //    }
+        //}
         private void SaveToDatabase(string tagId, string ipAddress, string scannerLoc)
         {
             using SqlConnection connection = new SqlConnection(_connectionString);
@@ -161,52 +217,46 @@ namespace Capstone
 
             if (scannerLoc == "SCANNERCOUNTER")
             {
-                // Check if there is an entry without an endtime
-                string checkQuery = @"
-            SELECT COUNT(*) FROM wiibandmonitor 
-            WHERE wiibandtag = @tagId AND endtime IS NULL";
+                // Update the StartTime for the Dashboard table if SCANNERCOUNTER is detected
+                string updateStartTimeQuery = @"
+            UPDATE wiijump_db.dbo.Dashboard
+            SET StartTime = @startTime
+            WHERE WiibandID = @tagId AND StartTime IS NULL";
 
-                using SqlCommand checkCmd = new SqlCommand(checkQuery, connection);
-                checkCmd.Parameters.AddWithValue("@tagId", tagId);
-                int openEntryCount = (int)checkCmd.ExecuteScalar();
+                using SqlCommand updateStartCmd = new SqlCommand(updateStartTimeQuery, connection);
+                updateStartCmd.Parameters.AddWithValue("@tagId", tagId);
+                updateStartCmd.Parameters.AddWithValue("@startTime", DateTime.Now);
 
-                // If there's no open entry, insert a new record
-                if (openEntryCount == 0)
+                int rowsAffected = updateStartCmd.ExecuteNonQuery();
+                if (rowsAffected > 0)
                 {
-                    string insertQuery = @"
-                INSERT INTO wiibandmonitor (wiibandtag, wiibandip, starttime)
-                VALUES (@tagId, @ipAddress, @starttime)";
-
-                    using SqlCommand insertCmd = new SqlCommand(insertQuery, connection);
-                    insertCmd.Parameters.AddWithValue("@tagId", tagId);
-                    insertCmd.Parameters.AddWithValue("@ipAddress", ipAddress);
-                    insertCmd.Parameters.AddWithValue("@starttime", DateTime.Now);
-               
-
-                    insertCmd.ExecuteNonQuery();
-                    _logger.LogInformation("Inserted new entry with starttime for SCANNERCOUNTER.");
+                    _logger.LogInformation("StartTime updated for SCANNERCOUNTER.");
+                }
+                else
+                {
+                    _logger.LogWarning("No entry found to update StartTime for SCANNERCOUNTER.");
                 }
             }
             else if (scannerLoc == "SCANNEREXIT")
             {
-                // Update the latest entry's endtime if it exists
-                string updateQuery = @"
-            UPDATE wiibandmonitor
-            SET endtime = @endtime
-            WHERE wiibandtag = @tagId AND endtime IS NULL";
+                // Update the EndTime for the Dashboard table if SCANNEREXIT is detected
+                string updateEndTimeQuery = @"
+            UPDATE wiijump_db.dbo.Dashboard
+            SET EndTime = @endTime
+            WHERE WiibandID = @tagId AND EndTime IS NULL";
 
-                using SqlCommand updateCmd = new SqlCommand(updateQuery, connection);
-                updateCmd.Parameters.AddWithValue("@tagId", tagId);
-                updateCmd.Parameters.AddWithValue("@endtime", DateTime.Now);
+                using SqlCommand updateEndCmd = new SqlCommand(updateEndTimeQuery, connection);
+                updateEndCmd.Parameters.AddWithValue("@tagId", tagId);
+                updateEndCmd.Parameters.AddWithValue("@endTime", DateTime.Now);
 
-                int rowsAffected = updateCmd.ExecuteNonQuery();
+                int rowsAffected = updateEndCmd.ExecuteNonQuery();
                 if (rowsAffected > 0)
                 {
-                    _logger.LogInformation("Updated endtime for SCANNEREXIT.");
+                    _logger.LogInformation("EndTime updated for SCANNEREXIT.");
                 }
                 else
                 {
-                    _logger.LogWarning("No open entry to update for SCANNEREXIT.");
+                    _logger.LogWarning("No entry found to update EndTime for SCANNEREXIT.");
                 }
             }
         }

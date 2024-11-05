@@ -31,7 +31,6 @@ namespace Capstone.Pages
         public IActionResult OnPost()
         {
             var user = _context.Users.SingleOrDefault(u => u.Username == Username);
-
             if (user != null)
             {
                 // Verify the password

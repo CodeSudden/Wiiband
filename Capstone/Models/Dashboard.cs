@@ -12,8 +12,7 @@ namespace Capstone.Models
         public TimeSpan? StartTime { get; set; }
         public TimeSpan? EndTime { get; set; }
         public string RemainingTime { get; set; }
-        public string Status { get; set; }
-        public decimal? BatteryLevel { get; set; }
+
 
         // New properties for customer details
         public string CustomerName { get; set; }
