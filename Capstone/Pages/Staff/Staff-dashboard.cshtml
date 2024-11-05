@@ -50,13 +50,14 @@
             </div>
         </div>
     </div>
+
     <div class="d-flex justify-content-between mb-4">
         <h3>Transaction</h3>
         <form method="post">
             <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
                 <option value="">All</option>
-                <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
-                <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
+                <option value="Online" selected="@(Model.StatusFilter == "Online" ? "selected" : "")">Online</option>
+                <option value="Offline" selected="@(Model.StatusFilter == "Offline" ? "selected" : "")">Offline</option>
             </select>
         </form>
     </div>
@@ -103,20 +104,19 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-    <script>
-        function fetchTransactionUpdate() {
-            $.ajax({
-                url: '/api/StaffDashboard/GetTransactionUpdate',
-                type: 'POST',
-                contentType: 'application/json',
-                success: function (data) {
-                    const tableBody = document.querySelector("#transactionTable tbody");
-                    tableBody.innerHTML = ''; // Clear the existing table rows
+    function fetchTransactionUpdate() {
+        $.ajax({
+            url: '/api/StaffDashboard/GetTransactionUpdate',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                const tableBody = document.querySelector("#transactionTable tbody");
+                tableBody.innerHTML = ''; // Clear the existing table rows
 
-                    // Populate table with new data
-                    data.forEach(transaction => {
-                        const row = document.createElement("tr");
-                        row.innerHTML = `
+                // Populate table with new data
+                data.forEach(transaction => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
                             <td>${transaction.TransactionNumber}</td>
                             <td>${transaction.WiibandID || 'N/A'}</td>
                             <td>${transaction.CustomerName || 'N/A'}</td>
@@ -127,15 +127,14 @@
                             <td>${transaction.Status || 'N/A'}</td>
                             <td>${transaction.BatteryLevel || 'N/A'}%</td>
                         `;
-                        tableBody.appendChild(row);
-                    });
-                },
-                error: function (error) {
-                    console.error("Error fetching transaction updates:", error);
-                }
-            });
-        }
-
+                    tableBody.appendChild(row);
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching transaction updates:", error);
+            }
+        });
+    }
 </script>
 
 
