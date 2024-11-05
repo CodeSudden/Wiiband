@@ -40,11 +40,5 @@ namespace Capstone.Pages.Staff
             TotalSalesToday = _context.GetTotalSalesForToday();
             Transactions = _context.Transactions.ToList();
         }
-
-        public Staff_dashboardModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
-        {
-            _context = context;
-            _httpContextAccessor = httpContextAccessor;
-        }
     }
 }

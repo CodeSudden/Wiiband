@@ -194,8 +194,6 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public required string Email { get; set; }
     }
 
-  
-
     public class Customers
     { 
         public int Id { get; set; }
@@ -228,19 +226,6 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public DateTime Updated_at { get; set; }
     }
 
-    public class Customers
-    {
-        public int Id { get; set; }
-        public string? Customer_name { get; set; }
-        public string? Customer_email { get; set; }
-        public int Num_jumpers { get; set; }
-        public int Promo { get; set; }
-        public int Discount { get; set; }
-        public decimal Total_amount { get; set; }
-        public string? SignatureData { get; set; }
-        public DateTime Created_at { get; set; }
-    }
-
     public class Events
     {
         public int Id { get; set; }
@@ -262,4 +247,3 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int PartyEquipUtils { get; set; }
         public DateTime Created_at { get; set; }
     }
-}
