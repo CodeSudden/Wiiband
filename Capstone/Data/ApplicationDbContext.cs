@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using Capstone.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace Capstone.Data // Replace with your actual namespace if different
 {
@@ -14,27 +16,33 @@ namespace Capstone.Data // Replace with your actual namespace if different
 
         public class Visitor // visitor count
         {
+            public int Id { get; set; } // Primary key for the Visitor table
             public int TransactionCount { get; set; }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Visitor>()
-                .HasKey(v => v.TransactionCount);
+                .HasKey(v => v.Id); // Set Id as the primary key
+
             // Additional model configurations for other entities can follow here
         }
-
         // Method to insert the transaction count into the Visitors table
         public void UpdateTransactionCountInVisitors()
         {
             // Clear the Visitors table to only keep the latest transaction count
-            Visitors.ExecuteDelete(); // Ensures only one row is maintained
+            Visitors.RemoveRange(Visitors); // Clear all entries in Visitors
 
             // Count the transactions and add a new record to Visitors
             var transactionCount = Transactions.Count();
             Visitors.Add(new Visitor { TransactionCount = transactionCount });
             SaveChanges();
         }
+        public int GetTotalJumpers()
+        {
+            return Customers.Sum(c => c.Num_jumpers);
+        }
+
 
         public int GetTransactionCountFromVisitors()
         {
@@ -78,56 +86,64 @@ namespace Capstone.Data // Replace with your actual namespace if different
                 .Sum(c => c.Total_amount);
         }
 
-        /* DbSets for your entities
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Staff> Staff { get; set; }
-        public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Dashboard> Dashboard { get; set; }
-        public DbSet<Registration> Registrations { get; set; }  // Add this line
 
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        public class ApplicationUser : IdentityUser
         {
-            // Customer entity configuration
-            modelBuilder.Entity<Customer>()
-                .HasKey(c => c.Id);
+            public string? Type { get; set; } 
+            public string? DisplayName { get; set; }
+        }
 
-            modelBuilder.Entity<Customer>()
-                .Property(c => c.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
 
-            // Staff entity configuration
-            modelBuilder.Entity<Staff>()
-                .HasKey(s => s.StaffId);
+    /* DbSets for your entities
+    public DbSet<Customer> Customers { get; set; }
+    public DbSet<Staff> Staff { get; set; }
+    public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<Dashboard> Dashboard { get; set; }
+    public DbSet<Registration> Registrations { get; set; }  // Add this line
 
-            // WiibandRegistration entity configuration
-            modelBuilder.Entity<WiibandRegistration>()
-                .HasKey(w => w.Id);
 
-            modelBuilder.Entity<WiibandRegistration>()
-                .HasOne(w => w.Staff)
-                .WithMany()
-                .HasForeignKey(w => w.StaffId);
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // Customer entity configuration
+        modelBuilder.Entity<Customer>()
+            .HasKey(c => c.Id);
 
-            modelBuilder.Entity<WiibandRegistration>()
-                .Property(w => w.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+        modelBuilder.Entity<Customer>()
+            .Property(c => c.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
 
-            // Transaction entity configuration
-            modelBuilder.Entity<Transaction>()
-                .HasKey(t => t.TransactionId);
+        // Staff entity configuration
+        modelBuilder.Entity<Staff>()
+            .HasKey(s => s.StaffId);
 
-            modelBuilder.Entity<Transaction>()
-                .HasOne(t => t.WiibandRegistration)
-                .WithMany()
-                .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
+        // WiibandRegistration entity configuration
+        modelBuilder.Entity<WiibandRegistration>()
+            .HasKey(w => w.Id);
 
-            modelBuilder.Entity<Transaction>()
-                .Property(t => t.TotalAmount)
-                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
-        }*/
-        public DbSet<DashboardDisplay> Dashboards { get; set; }
+        modelBuilder.Entity<WiibandRegistration>()
+            .HasOne(w => w.Staff)
+            .WithMany()
+            .HasForeignKey(w => w.StaffId);
+
+        modelBuilder.Entity<WiibandRegistration>()
+            .Property(w => w.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+
+        // Transaction entity configuration
+        modelBuilder.Entity<Transaction>()
+            .HasKey(t => t.TransactionId);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.WiibandRegistration)
+            .WithMany()
+            .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
+
+        modelBuilder.Entity<Transaction>()
+            .Property(t => t.TotalAmount)
+            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+    }*/
+    public DbSet<DashboardDisplay> Dashboards { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
@@ -161,6 +177,8 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public required string CustomerName { get; set; }
         public required string Email { get; set; }
     }
+
+  
 
     public class Customers
     { 

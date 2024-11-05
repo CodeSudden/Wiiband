@@ -17,8 +17,8 @@
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
-                    <h5 id="month">August</h5>
-                    <p id="year">2024</p>
+                    <h5>@DateTime.Now.ToString("MMMM")</h5> <!-- Display current month -->
+                    <p>@DateTime.Now.Year</p> <!-- Display current year -->
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
             <div class="info-card shadow-hover">
                 <i class="bi bi-people-fill icon"></i>
                 <div class="info-text">
-                    <h5>@Model.Visitors</h5>
+                    <h5>@Model.TotalJumpers</h5>
                     <p>Visitors</p>
                 </div>
             </div>

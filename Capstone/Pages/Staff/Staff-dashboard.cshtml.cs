@@ -2,6 +2,7 @@ using Capstone.Data;
 using Capstone.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +19,7 @@ namespace Capstone.Pages.Staff
         public string StatusFilter { get; set; }
         public int Visitors { get; private set; }
         public decimal TotalSalesToday { get; private set; }
+        public int TotalJumpers { get; private set; } // New property for total jumpers
 
         public Staff_dashboardModel(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
         {
@@ -39,10 +41,18 @@ namespace Capstone.Pages.Staff
 
             TotalSalesToday = _context.GetTotalSalesForToday();
 
-            // Retrieve the visitor (transaction count) from the Visitors table
+            // Update visitors count in the Visitors table
+            _context.UpdateTransactionCountInVisitors();
+
+            TotalJumpers = _context.GetTotalJumpers();
+
+            // Set Visitors to the latest count from the Visitors table
             Visitors = _context.GetTransactionCountFromVisitors();
 
+            // Filter transactions to include only those with today's date
+            var today = DateTime.Today;
             DashboardEntries = _context.Transactions
+                .Where(t => t.Date.Date == today) // Ensure the date is today
                 .Select(t => new DashboardDisplay
                 {
                     TransactionNumber = t.TransactionNumber,
@@ -58,8 +68,9 @@ namespace Capstone.Pages.Staff
 
         public void OnPost()
         {
+            var today = DateTime.Today;
             DashboardEntries = _context.Transactions
-                .Where(t => string.IsNullOrEmpty(StatusFilter) || t.Status == StatusFilter)
+                .Where(t => (string.IsNullOrEmpty(StatusFilter) || t.Status == StatusFilter) && t.Date.Date == today) // Filter by date and status
                 .Select(t => new DashboardDisplay
                 {
                     TransactionNumber = t.TransactionNumber,

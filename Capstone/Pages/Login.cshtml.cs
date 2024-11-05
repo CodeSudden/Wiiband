@@ -27,7 +27,7 @@ namespace Capstone.Pages
 
         public IActionResult OnPost()
         {
-            var user = _context.Users.SingleOrDefault(u => u.Username == Username && u.Password == Password);
+            var user = _context.Users.SingleOrDefault(u => u.Username == this.Username && u.Password == this.Password);
 
             if (user != null)
             {
