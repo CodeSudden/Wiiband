@@ -12,7 +12,7 @@ namespace Capstone.Pages.Admin.Addons
         {
             _context = context;
         }
-
+        
         public class Staff
         {
             public int Id { get; set; }

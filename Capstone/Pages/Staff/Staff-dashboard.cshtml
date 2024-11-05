@@ -5,31 +5,20 @@
     Layout = "_StaffLayout";
 }
 
-<!-- Announcement Section -->
 <div class="container mt-4">
-    <div class="alert alert-info d-flex align-items-center shadow-sm p-3 rounded mb-4" role="alert">
-        <i class="bi bi-megaphone-fill me-3" style="font-size: 1.5rem;"></i>
-        <div>
-            <strong>Announcement:</strong> The next system maintenance is scheduled for August 15, 2024. Please save your work in advance.
-        </div>
-    </div>
-</div>
-
-<div class="container mt-4">
-    <!-- Page Title -->
     <div class="row mb-4">
         <div class="col">
             <h2>Dashboard - Fiesta Carnival</h2>
         </div>
     </div>
-    <!-- Info Boxes -->
+
     <div class="row">
         <div class="col-md-3 mb-3">
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
-                    <h5 id="month">August</h5>
-                    <p id="year">2024</p>
+                    <h5>@DateTime.Now.ToString("MMMM")</h5> <!-- Display current month -->
+                    <p>@DateTime.Now.Year</p> <!-- Display current year -->
                 </div>
             </div>
         </div>
@@ -37,7 +26,7 @@
             <div class="info-card shadow-hover">
                 <i class="bi bi-people-fill icon"></i>
                 <div class="info-text">
-                    <h5>12</h5>
+                    <h5>@Model.TotalJumpers</h5>
                     <p>Visitors</p>
                 </div>
             </div>
@@ -62,19 +51,17 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
     <div class="d-flex justify-content-between mb-4">
         <h3>Transaction</h3>
         <form method="post">
             <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
                 <option value="">All</option>
-                <option value="Online" selected="@((Model.StatusFilter == "Online") ? true : false)">Online</option>
-                <option value="Offline" selected="@((Model.StatusFilter == "Offline") ? true : false)">Offline</option>
+                <option value="Online" selected="@(Model.StatusFilter == "Online" ? "selected" : "")">Online</option>
+                <option value="Offline" selected="@(Model.StatusFilter == "Offline" ? "selected" : "")">Offline</option>
             </select>
         </form>
     </div>
 
-    <!-- Transaction Table -->
     <div class="row">
         <div class="col-12">
             <div class="transaction-table">
@@ -84,14 +71,11 @@
                             <tr>
                                 <th>Transaction Number</th>
                                 <th>Wiiband</th>
-                                <th>Customer Name</th> <!-- New Column -->
-                                <th>Email</th>          <!-- New Column -->
+                                <th>Customer Name</th>
+                                <th>Email</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
-                                <th>Status</th>
-                                <th>Deactivation</th>
-                                @*<th>Battery</th>*@
                             </tr>
                         </thead>
                         <tbody>
@@ -122,47 +106,37 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const d = new Date();
-    let month = months[d.getMonth()];
-    let day = d.getDate();
-    let year = d.getFullYear();
-    document.getElementById("month").innerHTML = month + " " + day;
-    document.getElementById("year").innerHTML = year;
+    function fetchTransactionUpdate() {
+        $.ajax({
+            url: '/api/StaffDashboard/GetTransactionUpdate',
+            type: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                const tableBody = document.querySelector("#transactionTable tbody");
+                tableBody.innerHTML = ''; // Clear the existing table rows
 
-    // Establish a connection to the SignalR hub
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/StaffDashboardHub")  // Make sure the URL matches the one mapped in Startup.cs
-        .build();
-  
-     // Function to handle incoming registration updates
-        connection.on("ReceiveRegistrationUpdate", function (data) {
-            const tableBody = document.querySelector("#transactionTable tbody");
-
-            // Create a new row for the transaction
-            const row = document.createElement("tr");
-
-            // Populate the new row with transaction details
-            row.innerHTML = `
-                <td>${data.TransactionNumber}</td>
-                <td>${data.WiibandID || 'N/A'}</td>
-                <td>${data.CustomerName || 'N/A'}</td>
-                <td>${data.Email || 'N/A'}</td>
-                <td>${data.StartTime || 'N/A'}</td>
-                <td>${data.EndTime || 'N/A'}</td>
-                <td>${data.RemainingTime || 'N/A'}</td>
-                <td>${data.Status || 'N/A'}</td>
-                <td>${data.BatteryLevel || 'N/A'}%</td>
-            `;
-
-            // Append the new row to the table body
-            tableBody.appendChild(row);
+                // Populate table with new data
+                data.forEach(transaction => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                            <td>${transaction.TransactionNumber}</td>
+                            <td>${transaction.WiibandID || 'N/A'}</td>
+                            <td>${transaction.CustomerName || 'N/A'}</td>
+                            <td>${transaction.Email || 'N/A'}</td>
+                            <td>${transaction.StartTime || 'N/A'}</td>
+                            <td>${transaction.EndTime || 'N/A'}</td>
+                            <td>${transaction.RemainingTime || 'N/A'}</td>
+                            <td>${transaction.Status || 'N/A'}</td>
+                            <td>${transaction.BatteryLevel || 'N/A'}%</td>
+                        `;
+                    tableBody.appendChild(row);
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching transaction updates:", error);
+            }
         });
-
-        // Start the SignalR connection
-        connection.start().catch(function (err) {
-        return console.error(err.toString());
-    });
+    }
 </script>
 
 

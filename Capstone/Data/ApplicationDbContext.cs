@@ -11,6 +11,44 @@ namespace Capstone.Data // Replace with your actual namespace if different
     public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+        public DbSet<Visitor> Visitors { get; set; }
+
+        public class Visitor // visitor count
+        {
+            public int Id { get; set; } // Primary key for the Visitor table
+            public int TransactionCount { get; set; }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Visitor>()
+                .HasKey(v => v.Id); // Set Id as the primary key
+
+            // Additional model configurations for other entities can follow here
+        }
+        // Method to insert the transaction count into the Visitors table
+        public void UpdateTransactionCountInVisitors()
+        {
+            // Clear the Visitors table to only keep the latest transaction count
+            Visitors.RemoveRange(Visitors); // Clear all entries in Visitors
+
+            // Count the transactions and add a new record to Visitors
+            var transactionCount = Transactions.Count();
+            Visitors.Add(new Visitor { TransactionCount = transactionCount });
+            SaveChanges();
+        }
+        public int GetTotalJumpers()
+        {
+            return Customers.Sum(c => c.Num_jumpers);
+        }
+
+
+        public int GetTransactionCountFromVisitors()
+        {
+            return Visitors.FirstOrDefault()?.TransactionCount ?? 0;
+        }
+
         public decimal GetTotalSales()
         {
             return Customers.Sum(c => c.Total_amount);
@@ -127,6 +165,21 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public string? Status { get; set; } // e.g., "Online" or "Offline"
     }
 
+    }
+    public class Transaction
+    {
+        public int Id { get; set; }
+        public string TransactionNumber { get; set; }
+        public int WiibandID { get; set; }
+        public string CustomerName { get; set; }
+        public string Email { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public string RemainingTime { get; set; }
+        public decimal Amount { get; set; } // assuming this is used for sales calculation
+        public DateTime Date { get; set; } // assuming for GetTotalSalesForToday logic
+        public string Status { get; set; } // e.g., "Online" or "Offline"
+    }
     public class DashboardDisplay
     {
         public int Id { get; set; }
@@ -135,13 +188,27 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public TimeSpan? StartTime { get; set; }
         public TimeSpan? EndTime { get; set; }
         public required string RemainingTime { get; set; }
-        public required string Status { get; set; }
-        public decimal? BatteryLevel { get; set; }
 
         // New properties for customer details
         public required string CustomerName { get; set; }
         public required string Email { get; set; }
     }
+
+  
+
+    public class Customers
+    { 
+        public int Id { get; set; }
+        public string? Customer_name { get; set; }
+        public string? Customer_email { get; set; }
+        public int Num_jumpers { get; set; }
+        public int Promo { get; set; }
+        public int Discount { get; set; }
+        public decimal Total_amount { get; set; }
+        public string? SignatureData { get; set; }
+        public DateTime Created_at { get; set; }
+    }
+
     public class Users
     {
         public int Id { get; set; }
@@ -153,7 +220,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public bool Email_notify { get; set; }
         public bool Sms_notify { get; set; }
         public bool Visibility { get; set; }
-        public bool Third_party {  get; set; }
+        public bool Third_party { get; set; }
         public string? Theme { get; set; }
         public int ContactNum { get; set; }
         public string? Shift { get; set; }
