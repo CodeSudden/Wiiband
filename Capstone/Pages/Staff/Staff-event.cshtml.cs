@@ -215,7 +215,7 @@ namespace Capstone.Pages.Staff
                 }
             }
 
-            return RedirectToPage("Success");
+            return RedirectToPage("Staff-event");
         }
     }
 }
