@@ -109,6 +109,22 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
+        public DbSet<Transactions> Transactions { get; set; }
+    }
+
+    public class Transactions
+    {
+        public int Id { get; set; }
+        public string? TransactionNumber { get; set; }
+        public int WiibandID { get; set; }
+        public string? CustomerName { get; set; }
+        public string? Email { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+        public string? RemainingTime { get; set; }
+        public decimal Amount { get; set; } // assuming this is used for sales calculation
+        public DateTime Date { get; set; } // assuming for GetTotalSalesForToday logic
+        public string? Status { get; set; } // e.g., "Online" or "Offline"
     }
 
     public class DashboardDisplay
@@ -146,7 +162,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
     }
 
     public class Customers
-    { 
+    {
         public int Id { get; set; }
         public string? Customer_name { get; set; }
         public string? Customer_email { get; set; }
