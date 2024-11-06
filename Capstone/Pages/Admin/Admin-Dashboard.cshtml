@@ -76,10 +76,11 @@
                             <tr>
                                 <th>Transaction Number</th>
                                 <th>Wiiband</th>
+                                <th>Customer Name</th>
+                                <th>Email</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th>Remaining Time</th>
-                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,14 +88,15 @@
                             {
                                 <tr>
                                     <td>@transaction.TransactionNumber</td>
-                                    <td>@transaction.Wiiband</td>
-                                    <td>@transaction.StartTime</td>
-                                    <td>@transaction.EndTime</td>
+                                    <td>@transaction.WiibandID</td>
+                                    <td>@transaction.CustomerName</td>
+                                    <td>@transaction.Email</td>
+                                    <td>@transaction.StartTime?.ToString(@"hh\:mm")</td>
+                                    <td>@transaction.EndTime?.ToString(@"hh\:mm")</td>
                                     <td>@transaction.RemainingTime</td>
                                     <td>
-                                        <a asp-page="/Admin/Addons/DeactivateConfirmation" asp-route-transactionNumber="@transaction.TransactionNumber" class="btn btn-outline-danger btn-sm">
-                                            Deactivate
-                                        </a>
+                                        <!-- Assuming deactivation is a link or button; otherwise, remove if not applicable -->
+                                        <a href="#" class="btn btn-danger btn-sm">Deactivate</a>
                                     </td>
                                 </tr>
                             }

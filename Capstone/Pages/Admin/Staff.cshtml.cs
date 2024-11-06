@@ -1,4 +1,5 @@
 using Capstone.Data;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 
@@ -40,6 +41,19 @@ namespace Capstone.Pages.Admin.Addons
                     Shift = u.Shift,
                     Type = u.Type
                 }).ToList();
+        }
+        // POST handler for deleting staff
+        public IActionResult OnPostDelete(int id)
+        {
+            var staffToDelete = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (staffToDelete != null)
+            {
+                _context.Users.Remove(staffToDelete);
+                _context.SaveChanges();
+            }
+
+            // Redirect back to the page after deletion
+            return RedirectToPage();
         }
     }
 }

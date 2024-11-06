@@ -494,7 +494,7 @@
         console.log("Number of People:", numPeople);
 
         // Jumping package: Recommend based on duration and cost per person
-        const jumpingCostPerPerson = 600;
+        const jumpingCostPerPerson = 499;
         const jumpingDuration = budget / (jumpingCostPerPerson * numPeople) >= 3 ? 3 : budget / (jumpingCostPerPerson * numPeople) >= 2 ? 2 : 1;
         totalCost += jumpingCostPerPerson * numPeople * jumpingDuration;
         recommendations['Duration'] = jumpingDuration;
