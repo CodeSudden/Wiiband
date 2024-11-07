@@ -7,6 +7,7 @@ using Capstone.Hubs;
 using Capstone.Data;
 using DotNetEnv;
 using Capstone;
+using Capstone.Models;
 
 Env.Load();
 
@@ -17,6 +18,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddSession();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR(); // Add SignalR
+builder.Services.AddScoped<DashboardService>(); // Register the DashboardService
+
+
 
 
 // Configure database connection using the connection string
@@ -34,6 +38,7 @@ builder.Services.AddSignalR();
 
 // Initialize Stripe with the secret key from the configuration
 StripeConfiguration.ApiKey = stripeSettings.GetValue<string>("SecretKey");
+
 
 // Add Google authentication
 builder.Services.AddAuthentication(options =>

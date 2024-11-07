@@ -109,7 +109,10 @@
             </div>
             <div class="modal-body p-4">
                 <form method="post" id="customPackageForm">
-                    <!-- Customer Information -->
+                    <div id="suggestionPlaceholder" class="alert alert-info mt-3" style="display: none;">
+                        <!-- DSS suggestion content will be displayed here -->
+                    </div>
+
                     <h6>Customer Information</h6>
                     <div class="mb-3">
                         <label class="form-label">Name</label>
@@ -124,7 +127,6 @@
                         <input type="tel" asp-for="Phone" class="form-control rounded-pill" required />
                     </div>
 
-                    <!-- Event Date and Time -->
                     <h6>Event Date and Time</h6>
                     <div class="mb-3">
                         <label class="form-label">Event Date</label>
@@ -135,7 +137,6 @@
                         <input type="time" asp-for="Time" class="form-control rounded-pill" required />
                     </div>
 
-                    <!-- Jumping Package -->
                     <h6>Jumping Package</h6>
                     <div class="mb-3">
                         <label class="form-label">Time</label>
@@ -155,7 +156,6 @@
                         <input type="number" asp-for="Socks" class="form-control rounded-pill" min="1" required />
                     </div>
 
-                    <!-- Add-ons -->
                     <h6>Add-ons</h6>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" asp-for="EInvitation" id="eInvitation">
@@ -301,6 +301,32 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('customPackageForm').addEventListener('change', function () {
+                            const formData = {
+                                Duration: parseInt(document.querySelector('[asp-for="Duration"]').value),
+                                Jumpers: parseInt(document.querySelector('[asp-for="Jumpers"]').value),
+                                Socks: parseInt(document.querySelector('[asp-for="Socks"]').value),
+                                EInvitation: document.querySelector('[asp-for="EInvitation"]').checked,
+                                GameCoach: document.querySelector('[asp-for="GameCoach"]').checked,
+                                WaterBottle: document.querySelector('[asp-for="WaterBottle"]').checked,
+                                MelonaIC: document.querySelector('[asp-for="MelonaIC"]').checked,
+                                PartyDecorations: document.querySelector('[asp-for="PartyDecorations"]').value
+                            };
+
+                            fetch('@Url.Page("/Staff/SuggestPackage")', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(formData)
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                const suggestionElement = document.getElementById('suggestionPlaceholder');
+                                suggestionElement.style.display = 'block';
+                                suggestionElement.innerHTML = data.suggestion;
+                            });
+                        });
+</script>
 
 <!-- FullCalendar Script -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.0.2/index.global.min.js"></script>
@@ -530,4 +556,5 @@
         background-color: #f0f8ff;
         transition: background-color 0.2s ease-in-out;
     }
+
 </style>

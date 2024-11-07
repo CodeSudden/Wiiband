@@ -4,6 +4,7 @@ using System;
 using Capstone.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using static Capstone.Pages.Admin.ForecastingModel;
 
 
 namespace Capstone.Data // Replace with your actual namespace if different
@@ -38,15 +39,14 @@ namespace Capstone.Data // Replace with your actual namespace if different
             Visitors.Add(new Visitor { TransactionCount = transactionCount });
             SaveChanges();
         }
-        public int GetTotalJumpers()
-        {
-            return Customers.Sum(c => c.Num_jumpers);
-        }
-
 
         public int GetTransactionCountFromVisitors()
         {
             return Visitors.FirstOrDefault()?.TransactionCount ?? 0;
+        }
+        public int GetTotalJumpers()
+        {
+            return Customers.Sum(c => c.Num_jumpers);
         }
 
         public decimal GetTotalSales()
@@ -86,85 +86,76 @@ namespace Capstone.Data // Replace with your actual namespace if different
                 .Sum(c => c.Total_amount);
         }
 
+        internal object Wiibands(Func<object, bool> value)
+        {
+            throw new NotImplementedException();
+        }
 
         public class ApplicationUser : IdentityUser
         {
-            public string? Type { get; set; } 
+            public string? Type { get; set; }
             public string? DisplayName { get; set; }
         }
 
 
-    /* DbSets for your entities
-    public DbSet<Customer> Customers { get; set; }
-    public DbSet<Staff> Staff { get; set; }
-    public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
-    public DbSet<Transaction> Transactions { get; set; }
-    public DbSet<Dashboard> Dashboard { get; set; }
-    public DbSet<Registration> Registrations { get; set; }  // Add this line
+        /* DbSets for your entities
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<Staff> Staff { get; set; }
+        public DbSet<WiibandRegistration> WiibandRegistrations { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Dashboard> Dashboard { get; set; }
+        public DbSet<Registration> Registrations { get; set; }  // Add this line
 
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // Customer entity configuration
-        modelBuilder.Entity<Customer>()
-            .HasKey(c => c.Id);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Customer entity configuration
+            modelBuilder.Entity<Customer>()
+                .HasKey(c => c.Id);
 
-        modelBuilder.Entity<Customer>()
-            .Property(c => c.TotalAmount)
-            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+            modelBuilder.Entity<Customer>()
+                .Property(c => c.TotalAmount)
+                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
 
-        // Staff entity configuration
-        modelBuilder.Entity<Staff>()
-            .HasKey(s => s.StaffId);
+            // Staff entity configuration
+            modelBuilder.Entity<Staff>()
+                .HasKey(s => s.StaffId);
 
-        // WiibandRegistration entity configuration
-        modelBuilder.Entity<WiibandRegistration>()
-            .HasKey(w => w.Id);
+            // WiibandRegistration entity configuration
+            modelBuilder.Entity<WiibandRegistration>()
+                .HasKey(w => w.Id);
 
-        modelBuilder.Entity<WiibandRegistration>()
-            .HasOne(w => w.Staff)
-            .WithMany()
-            .HasForeignKey(w => w.StaffId);
+            modelBuilder.Entity<WiibandRegistration>()
+                .HasOne(w => w.Staff)
+                .WithMany()
+                .HasForeignKey(w => w.StaffId);
 
-        modelBuilder.Entity<WiibandRegistration>()
-            .Property(w => w.TotalAmount)
-            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+            modelBuilder.Entity<WiibandRegistration>()
+                .Property(w => w.TotalAmount)
+                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
 
-        // Transaction entity configuration
-        modelBuilder.Entity<Transaction>()
-            .HasKey(t => t.TransactionId);
+            // Transaction entity configuration
+            modelBuilder.Entity<Transaction>()
+                .HasKey(t => t.TransactionId);
 
-        modelBuilder.Entity<Transaction>()
-            .HasOne(t => t.WiibandRegistration)
-            .WithMany()
-            .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.WiibandRegistration)
+                .WithMany()
+                .HasForeignKey(t => t.WiibandRegistrationId); // Assuming you have this property in Transaction
 
-        modelBuilder.Entity<Transaction>()
-            .Property(t => t.TotalAmount)
-            .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
-    }*/
-    public DbSet<DashboardDisplay> Dashboards { get; set; }
+            modelBuilder.Entity<Transaction>()
+                .Property(t => t.TotalAmount)
+                .HasColumnType("decimal(18, 2)"); // Specify the precision and scale for decimal
+        }*/
+        public DbSet<DashboardDisplay> Dashboards { get; set; }
+        public DbSet<AttendanceData> AttendanceData { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
-        public DbSet<Transactions> Transactions { get; set; }
-    }
-
-    public class Transactions
-    {
-        public int Id { get; set; }
-        public string? TransactionNumber { get; set; }
-        public int WiibandID { get; set; }
-        public string? CustomerName { get; set; }
-        public string? Email { get; set; }
-        public TimeSpan? StartTime { get; set; }
-        public TimeSpan? EndTime { get; set; }
-        public string? RemainingTime { get; set; }
-        public decimal Amount { get; set; } // assuming this is used for sales calculation
-        public DateTime Date { get; set; } // assuming for GetTotalSalesForToday logic
-        public string? Status { get; set; } // e.g., "Online" or "Offline"
-    }
-
+        public DbSet<Transaction> Transactions { get; set; }
+        public object Dashboard { get; internal set; }
+        public object Wiiband { get; internal set; }
+        public object WiibandModel { get; internal set; }
     }
     public class Transaction
     {
@@ -179,6 +170,8 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public decimal Amount { get; set; } // assuming this is used for sales calculation
         public DateTime Date { get; set; } // assuming for GetTotalSalesForToday logic
         public string Status { get; set; } // e.g., "Online" or "Offline"
+        public int TransactionID { get; internal set; }
+        public bool IsActive { get; internal set; }
     }
     public class DashboardDisplay
     {
@@ -189,15 +182,17 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public TimeSpan? EndTime { get; set; }
         public required string RemainingTime { get; set; }
 
+
+
         // New properties for customer details
         public required string CustomerName { get; set; }
         public required string Email { get; set; }
     }
 
-  
+
 
     public class Customers
-    { 
+    {
         public int Id { get; set; }
         public string? Customer_name { get; set; }
         public string? Customer_email { get; set; }
@@ -222,23 +217,10 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public bool Visibility { get; set; }
         public bool Third_party { get; set; }
         public string? Theme { get; set; }
-        public int ContactNum { get; set; }
-        public string? Shift { get; set; }
         public DateTime Created_at { get; set; }
         public DateTime Updated_at { get; set; }
-    }
-
-    public class Customers
-    {
-        public int Id { get; set; }
-        public string? Customer_name { get; set; }
-        public string? Customer_email { get; set; }
-        public int Num_jumpers { get; set; }
-        public int Promo { get; set; }
-        public int Discount { get; set; }
-        public decimal Total_amount { get; set; }
-        public string? SignatureData { get; set; }
-        public DateTime Created_at { get; set; }
+        public int ContactNum { get; set; }
+        public string? Shift { get; set; }
     }
 
     public class Events

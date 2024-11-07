@@ -32,9 +32,11 @@
                             <td>@staff.DisplayName</td>
                             <td>@staff.Type</td> <!-- Assuming you want to show access level -->
                             <td>@staff.Username</td>
-                            <td>@staff.EmailAddress</td>
                             <td>@staff.ContactNum</td>
                             <td>@staff.Shift</td>
+
+                            <td>@staff.EmailAddress</td>
+                           
                             <td>
                                 <a asp-page="/Admin/EditStaff" asp-route-id="@staff.Id" class="btn btn-outline-warning btn-sm">
                                     <i class="bi bi-pencil"></i>

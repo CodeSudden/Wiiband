@@ -19,8 +19,9 @@ namespace Capstone.Pages.Admin.Addons
             public string? Username { get; set; }
             public string? DisplayName { get; set; }
             public string? EmailAddress { get; set; }
-            public int ContactNum { get; set; }
+            public int? ContactNum { get; set; }
             public string? Shift { get; set; }
+
             public string? Type { get; set; } // Include this if you need to show access level
         }
 

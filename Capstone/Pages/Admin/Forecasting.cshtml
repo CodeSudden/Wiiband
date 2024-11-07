@@ -1,81 +1,104 @@
 ﻿@page
 @model Capstone.Pages.Admin.ForecastingModel
 @{
-    ViewData["Title"] = "Forecasting Results"; 
+    ViewData["Title"] = "Forecasting Results";
     Layout = "_AdminLayout";
 }
 
 <h2>Forecasting Results</h2>
-<h3>30 days Forecast</h3>
 
-<div class="container">
-    <canvas id="paxQtyChart" width="800" height="400"></canvas>
-    <canvas id="paxAmountChart" width="800" height="400"></canvas>
-</div>
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @Model.ErrorMessage
+    </div>
+}
+else
+{
+    <h3>30 Days Forecast</h3>
+        
+    <div class="container">
+        <canvas id="paxQtyChart" width="800" height="400"></canvas>
+        <canvas id="paxAmountChart" width="800" height="400"></canvas>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Get forecasted results from the model
-    const forecastedResults = @Html.Raw(Json.Serialize(Model.ForecastedResults));
-
-    // Set up labels and data for the charts
-    const labels = forecastedResults.map(f => new Date(f.forecastDate).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }));
-    const paxQtyData = forecastedResults.map(f => f.forecastedPaxQty);
-    const paxAmountData = forecastedResults.map(f => f.forecastedPaxAmount);
-
-    // Create the Forecasted Pax Qty chart
-    const paxQtyCtx = document.getElementById('paxQtyChart').getContext('2d');
-    new Chart(paxQtyCtx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Forecasted Pax Qty',
-                data: paxQtyData,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Date' } },
-                y: { title: { display: true, text: 'Forecasted Pax Qty' } }
+    <h3>High Sales Prediction</h3>
+    <div class="container">
+        <ul>
+            @foreach (var forecast in Model.ForecastedResults)
+            {
+                <li>
+                    Date: @forecast.ForecastDate.ToString("MM/dd/yyyy") -
+                    Forecasted High Sales: @(forecast.HighSalesPrediction ? "Yes" : "No")
+                </li>
             }
-        }
-    });
+        </ul>
+    </div>
 
-    // Create the Forecasted Pax Amount chart
-    const paxAmountCtx = document.getElementById('paxAmountChart').getContext('2d');
-    new Chart(paxAmountCtx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Forecasted Pax Amount',
-                data: paxAmountData,
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                fill: true,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                }
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Get forecasted results from the model
+        const forecastedResults = @Html.Raw(Json.Serialize(Model.ForecastedResults));
+
+        // Set up labels and data for the charts
+        const labels = forecastedResults.map(f => new Date(f.forecastDate).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }));
+        const paxQtyData = forecastedResults.map(f => f.forecastedPaxQty);
+        const paxAmountData = forecastedResults.map(f => f.forecastedPaxAmount);
+
+        // Create the Forecasted Pax Qty chart
+        const paxQtyCtx = document.getElementById('paxQtyChart').getContext('2d');
+        new Chart(paxQtyCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Forecasted Pax Qty',
+                    data: paxQtyData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                }]
             },
-            scales: {
-                x: { title: { display: true, text: 'Date' } },
-                y: { title: { display: true, text: 'Forecasted Pax Amount' } }
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Forecasted Pax Qty' } }
+                }
             }
-        }
-    });
-</script>
+        });
+
+        // Create the Forecasted Pax Amount chart
+        const paxAmountCtx = document.getElementById('paxAmountChart').getContext('2d');
+        new Chart(paxAmountCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Forecasted Pax Amount',
+                    data: paxAmountData,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Forecasted Pax Amount' } }
+                }
+            }
+        });
+    </script>
+}
