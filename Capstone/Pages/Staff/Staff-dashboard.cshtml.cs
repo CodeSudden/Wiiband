@@ -80,7 +80,7 @@ namespace Capstone.Pages.Staff
             // Fetch Wiiband monitor data from the database
             LoadWiibandMonitorData();
         }
-
+        
         private void LoadWiibandMonitorData()
         {
             string? connectionString = _configuration.GetConnectionString("DefaultConnection");

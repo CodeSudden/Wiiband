@@ -284,8 +284,7 @@ namespace Capstone.Pages.Staff
                     command.ExecuteNonQuery();
                 }
             }
-
-            return RedirectToPage("/Staff/Staff-event");
+            return RedirectToPage("Staff-event");
         }
     }
 }

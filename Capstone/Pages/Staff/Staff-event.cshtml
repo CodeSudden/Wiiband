@@ -108,6 +108,16 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
+                <h6>Set your standards</h6>
+                <div class="mb-3">
+                    <label>Budget</label>
+                    <input type="number" id="budget" class="form-control rounded-pill" placeholder="Enter your budget" required />
+                </div>
+                <div class="mb-3">
+                    <label>Number of People</label>
+                    <input type="number" id="numPeople" class="form-control rounded-pill" placeholder="Enter number of attendees" required />
+                </div>
+                <button type="button" class="btn btn-info" onclick="recommendPackage()">Get Recommendation</button>
                 <form method="post" id="customPackageForm">
                     <div id="suggestionPlaceholder" class="alert alert-info mt-3" style="display: none;">
                         <!-- DSS suggestion content will be displayed here -->
@@ -140,7 +150,7 @@
                     <h6>Jumping Package</h6>
                     <div class="mb-3">
                         <label class="form-label">Time</label>
-                        <select asp-for="Duration" class="form-select rounded-pill">
+                        <select asp-for="Duration" id="duration" class="form-select rounded-pill">
                             <option value="1">1 Hour</option>
                             <option value="2">2 Hours</option>
                             <option value="3">3 Hours</option>
@@ -148,12 +158,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Jumpers</label>
-                        <input type="number" asp-for="Jumpers" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Jumpers" id="jumpers" class="form-control rounded-pill" min="1" required />
                         <small>₱499/head</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Number of Socks</label>
-                        <input type="number" asp-for="Socks" class="form-control rounded-pill" min="1" required />
+                        <input type="number" asp-for="Socks" id="socks" class="form-control rounded-pill" min="1" required />
                     </div>
 
                     <h6>Add-ons</h6>
@@ -176,7 +186,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Trampoline Games (How many?)</label>
-                        <input type="number" asp-for="TrampolineGames" class="form-control rounded-pill" min="1" required />
+                        <input type="number" id="Trampoline" asp-for="TrampolineGames" class="form-control rounded-pill" min="1" required />
                     </div>
 
                     <!-- Party Area -->
@@ -188,11 +198,11 @@
                     <div id="partyAreaDetails" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">How many guests?</label>
-                            <input type="number" asp-for="PartyGuest"class="form-control rounded-pill" />
+                            <input type="number" id="guests" asp-for="PartyGuest"class="form-control rounded-pill" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">How many hours?</label>
-                            <input type="number" asp-for="PartyHours" class="form-control rounded-pill"/>
+                            <input type="number" id="Hours" asp-for="PartyHours" class="form-control rounded-pill"/>
                         </div>
                         <small>Includes: Tables, Chairs, Tablecloth, Sound System</small>
                     </div>
@@ -206,8 +216,7 @@
                     <div id="decorationOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Choose a package</label>
-                            <select asp-for="PartyDecorations" class="form-select rounded-pill">
-                                <option hidden value="Null"></option>
+                            <select asp-for="PartyDecorations" id="PartyDecorations" class="form-select rounded-pill">
                                 <option value="HalfDeck">Half Deck - ₱8,000</option>
                                 <option value="WholeDeck">Whole Deck - ₱15,000</option>
                                 <option value="Premium">Premium - ₱25,000</option>
@@ -234,11 +243,11 @@
                     <div id="equipmentOptions" style="display: none;">
                         <div class="mb-3">
                             <label class="form-label">Chafing Dish (₱500/pc)</label>
-                            <input type="number" asp-for="PartyEquipCD" class="form-control rounded-pill" />
+                            <input type="number" id="EquipCD" asp-for="PartyEquipCD" class="form-control rounded-pill" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Plates, Glass, Spoon & Fork (₱100 per person)</label>
-                            <input type="number" asp-for="PartyEquipUtils" class="form-control rounded-pill" />
+                            <input type="number" id="EquipUtils" asp-for="PartyEquipUtils" class="form-control rounded-pill" />
                         </div>
                     </div>
 
@@ -496,6 +505,138 @@
     function toggleEquipmentOptions(checkbox) {
         const options = document.getElementById('equipmentOptions');
         options.style.display = checkbox.checked ? 'block' : 'none';
+    }
+</script>
+
+<script>
+    function recommendPackage() {
+        const budget = parseFloat(document.getElementById("budget").value);
+        const numPeople = parseInt(document.getElementById("numPeople").value);
+
+        let totalCost = 0;
+        let recommendations = {};
+
+        console.log("Initial Budget:", budget);
+        console.log("Number of People:", numPeople);
+
+        // Jumping package: Recommend based on duration and cost per person
+        const jumpingCostPerPerson = 499;
+        const jumpingDuration = budget / (jumpingCostPerPerson * numPeople) >= 3 ? 3 : budget / (jumpingCostPerPerson * numPeople) >= 2 ? 2 : 1;
+        totalCost += jumpingCostPerPerson * numPeople * jumpingDuration;
+        recommendations['Duration'] = jumpingDuration;
+
+        console.log("Jumping Package Duration:", jumpingDuration);
+        console.log("Total Cost after Jumping Package:", totalCost);
+
+        // Add-ons and other settings
+        let remainingBudget = budget - totalCost;
+        console.log("Remaining Budget after Jumping Package:", remainingBudget);
+
+        if (remainingBudget >= 3000) {
+            recommendations['EInvitation'] = true;
+            totalCost += 3000;
+            remainingBudget -= 3000;
+        }
+        if (remainingBudget >= 1500) {
+            recommendations['GameCoach'] = true;
+            totalCost += 1500;
+            remainingBudget -= 1500;
+        }
+        if (remainingBudget >= numPeople * 50) {
+            recommendations['WaterBottle'] = numPeople;
+            totalCost += numPeople * 50;
+            remainingBudget -= numPeople * 50;
+        }
+        if (remainingBudget >= numPeople * 80) {
+            recommendations['MelonaIC'] = numPeople;
+            totalCost += numPeople * 80;
+            remainingBudget -= numPeople * 80;
+        }
+
+        console.log("Add-ons Recommendations:", {
+            EInvitation: recommendations['EInvitation'],
+            GameCoach: recommendations['GameCoach'],
+            WaterBottle: recommendations['WaterBottle'],
+            MelonaIC: recommendations['MelonaIC']
+        });
+
+        const maxGames = Math.min(Math.floor(remainingBudget / 200), 5);
+        recommendations['TrampolineGames'] = maxGames >= 1 ? maxGames : 1;
+        totalCost += recommendations['TrampolineGames'] * 200;
+        remainingBudget -= recommendations['TrampolineGames'] * 200;
+
+        document.getElementById("Trampoline").value = recommendations['TrampolineGames']
+
+        console.log("Trampoline Games:", recommendations['TrampolineGames']);
+        console.log("Total Cost after Games:", totalCost);
+        console.log("Remaining Budget after Games:", remainingBudget);
+
+        // Set party area and decorations based on remaining budget
+        if (numPeople <= 20 && remainingBudget >= 8000) {
+            recommendations['PartyArea'] = true;
+            recommendations['PartyDecorations'] = "HalfDeck";
+            totalCost += 8000;
+        } else if (numPeople > 20 && remainingBudget >= 15000) {
+            recommendations['PartyArea'] = true;
+            recommendations['PartyDecorations'] = "WholeDeck";
+            totalCost += 15000;
+        } else if (remainingBudget >= 25000) {
+            recommendations['PartyArea'] = true;
+            recommendations['PartyDecorations'] = "Premium";
+            totalCost += 25000;
+        }
+
+        console.log("Party Area and Decorations Recommendations:", {
+            PartyArea: recommendations['PartyArea'],
+            PartyDecorations: recommendations['PartyDecorations']
+        });
+        console.log("Total Estimated Cost:", totalCost);
+
+        // Apply recommendations to the form fields
+        document.getElementById("duration").value = recommendations['Duration'];
+        document.getElementById("jumpers").value = numPeople;
+        const partyDecorationsSelect = document.getElementById("PartyDecorations");
+        const recommendedDecoration = recommendations['PartyDecorations'];
+
+        // Loop through options to select the recommended one
+        Array.from(partyDecorationsSelect.options).forEach(option => {
+            if (option.value === recommendedDecoration) {
+                option.selected = true;
+            }
+        });
+        if (recommendations['EInvitation']) document.getElementById("eInvitation").checked = true;
+        if (recommendations['GameCoach']) document.getElementById("gameCoach").checked = true;
+        if (recommendations['WaterBottle']) document.getElementById("waterBottle").checked = true;
+        if (recommendations['MelonaIC']) document.getElementById("melonaIceCream").checked = true;
+
+        if (recommendations['PartyArea']) {
+            document.getElementById("partyArea").checked = true;
+            document.getElementById("partyAreaDetails").style.display = "block";
+            document.getElementById("guests").value = numPeople;
+            document.getElementById("Hours").value = jumpingDuration;
+        }
+
+        if (recommendations['PartyDecorations']) {
+            document.getElementById("partyDecorations").checked = true;
+            document.getElementById("decorationOptions").style.display = "block";
+
+            if (remainingBudget >= 1000) {
+                document.getElementById("foodCart").checked = true;
+                document.getElementById("foodCartOptions").style.display = "block";
+                totalCost += 1000;
+            }
+        }
+
+        if (remainingBudget >= numPeople * 30) {
+            document.getElementById("partyEquipment").checked = true;
+            document.getElementById("equipmentOptions").style.display = "block";
+            document.getElementById("EquipCD").value = Math.min(numPeople, 10);
+            document.getElementById("EquipUtils").value = numPeople;
+        }
+
+        // Log final recommendations object for debugging
+        console.log("Final Recommendations:", recommendations);
+        alert(`Package Recommendation Complete! Total Estimated Cost: ₱${totalCost}`);
     }
 </script>
 

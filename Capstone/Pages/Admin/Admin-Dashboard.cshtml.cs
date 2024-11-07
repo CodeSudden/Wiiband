@@ -16,7 +16,7 @@ namespace Capstone.Pages.Admin
         private readonly DashboardService _dashboardService;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public List<Transaction> Transactions { get; set; }
+        public List<Transactions> Transactions { get; set; } = new List<Transactions>();
         [BindProperty(SupportsGet = true)]
         public string StatusFilter { get; set; }
         public decimal TotalSales { get; private set; }
@@ -47,7 +47,7 @@ namespace Capstone.Pages.Admin
             Visitors = _dashboardService.GetVisitorsCount();
 
             // Simulate getting data from the database
-            Transactions = GetAllTransactions();
+            Transactions = _context.Transactions.ToList();
         }
 
         public Admin_DashboardModel(DashboardService dashboardService, ApplicationDbContext context, IHttpContextAccessor httpContextAccessor)
@@ -55,46 +55,6 @@ namespace Capstone.Pages.Admin
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _dashboardService = dashboardService;
-        }
-
-        public void OnPost()
-        {
-            // Simulate getting data from the database
-            Transactions = GetAllTransactions();
-
-            // Apply filtering logic
-            if (!string.IsNullOrEmpty(StatusFilter))
-            {
-                Transactions = Transactions.Where(t => t.Status.ToLower().Contains(StatusFilter.ToLower())).ToList();
-            }
-        }
-
-        private List<Transaction> GetAllTransactions()
-        {
-            // Sample data
-            return new List<Transaction>
-            {
-                new Transaction { TransactionNumber = "Trn-0011", Wiiband = "1", CustomerName = "Tine", Email = "tine@gmail.com",StartTime = "12:48pm", EndTime = "1:48pm", RemainingTime = "14 minutes"},
-                new Transaction { TransactionNumber = "Trn-0012", Wiiband = "2",CustomerName = "Rain", Email = "Rain@gmail.com", StartTime = "12:51pm", EndTime = "1:51pm", RemainingTime = "24 minutes" },
-                new Transaction { TransactionNumber = "Trn-0013", Wiiband = "3", CustomerName = "Khalin", Email = "Khalin@gmail.com",StartTime = "1:06pm", EndTime = "2:06pm", RemainingTime = "34 minutes" },
-                new Transaction { TransactionNumber = "--", Wiiband = "4", StartTime = "--", EndTime = "--", RemainingTime = "--", Status = "Offline", Battery = "63%" },
-                new Transaction { TransactionNumber = "--", Wiiband = "5", StartTime = "--", EndTime = "--", RemainingTime = "--", Status = "Offline", Battery = "78%" }
-            };
-        }
-
-        public class Transaction
-        {
-            public string TransactionNumber { get; set; }
-            public string Wiiband { get; set; }
-            public string CustomerName { get; set; }
-            public string Email { get; set; }
-
-            public string StartTime { get; set; }
-            public string EndTime { get; set; }
-            public string RemainingTime { get; set; }
-            public string Status { get; set; }
-            public string Battery { get; set; }
-            public string Deactivate { get; set; }
         }
     }
 }

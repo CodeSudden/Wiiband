@@ -188,9 +188,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public required string CustomerName { get; set; }
         public required string Email { get; set; }
     }
-
-
-
+  
     public class Customers
     {
         public int Id { get; set; }
@@ -244,4 +242,3 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int PartyEquipUtils { get; set; }
         public DateTime Created_at { get; set; }
     }
-}

@@ -118,12 +118,7 @@ namespace Capstone.Pages.Staff
                     }
                 }
             }
-
             return RedirectToPage("Staff-Dashboard");
         }
-
-
-
     }
-
 }
