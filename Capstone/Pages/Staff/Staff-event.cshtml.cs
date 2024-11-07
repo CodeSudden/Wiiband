@@ -150,6 +150,76 @@ namespace Capstone.Pages.Staff
             CalendarEventsJson = JsonConvert.SerializeObject(calendarEvents);
         }
 
+        public string SuggestPackage()
+        {
+            int baseCost = 499 * Jumpers;  // Base cost calculation based on number of jumpers
+            int totalCost = baseCost;
+            var suggestedAddons = new List<string>();
+
+            // 1. Duration-Based Recommendations
+            if (Duration == 1)
+            {
+                suggestedAddons.Add("Standard Package: 1 Hour Jump");
+            }
+            else if (Duration == 2)
+            {
+                suggestedAddons.Add("Extended Package: 2 Hours Jump");
+                totalCost += 200;  // Additional cost for extended time
+            }
+            else if (Duration >= 3)
+            {
+                suggestedAddons.Add("Premium Package: 3+ Hours Jump");
+                totalCost += 400;  // Additional cost for premium time
+            }
+
+            // 2. Add Recommendations Based on Number of Jumpers
+            if (Jumpers > 10)
+            {
+                suggestedAddons.Add("Group Discount");
+                totalCost -= 300;  // Apply a discount for larger groups
+            }
+            if (Socks > 0)
+            {
+                suggestedAddons.Add($"Socks: {Socks} pairs");
+                totalCost += Socks * 50;  // Cost per pair of socks
+            }
+
+            // 3. Add-on Recommendations Based on User Selection
+            if (EInvitation) { suggestedAddons.Add("E-Invitation"); totalCost += 100; }
+            if (GameCoach) { suggestedAddons.Add("Game Coach"); totalCost += 300; }
+            if (WaterBottle) { suggestedAddons.Add("Water Bottle Package"); totalCost += Jumpers * 20; }
+            if (MelonaIC) { suggestedAddons.Add("Melona Ice Cream"); totalCost += Jumpers * 30; }
+
+            // 4. Party Area and Decorations
+            if (!string.IsNullOrEmpty(PartyDecorations))
+            {
+                switch (PartyDecorations)
+                {
+                    case "HalfDeck":
+                        suggestedAddons.Add("Half Deck Decorations");
+                        totalCost += 8000;
+                        break;
+                    case "WholeDeck":
+                        suggestedAddons.Add("Whole Deck Decorations");
+                        totalCost += 15000;
+                        break;
+                    case "Premium":
+                        suggestedAddons.Add("Premium Decorations");
+                        totalCost += 25000;
+                        break;
+                }
+            }
+
+            // Return suggested package and estimated cost
+            return $"Estimated Cost: ₱{totalCost}. Recommended Package Add-ons: {string.Join(", ", suggestedAddons)}";
+        }
+
+
+        public IActionResult OnPostSuggestPackage([FromBody] StaffEventModel model)
+        {
+            var suggestion = SuggestPackage();
+            return new JsonResult(new { suggestion = suggestion });
+        }
 
         public IActionResult OnPost()
         {
@@ -214,7 +284,6 @@ namespace Capstone.Pages.Staff
                     command.ExecuteNonQuery();
                 }
             }
-
             return RedirectToPage("Staff-event");
         }
     }

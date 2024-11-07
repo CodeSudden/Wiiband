@@ -17,8 +17,8 @@
             <div class="info-card shadow-hover">
                 <i class="bi bi-calendar-check icon"></i>
                 <div class="info-text">
-                    <h5>@DateTime.Now.ToString("MMMM")</h5> <!-- Display current month -->
-                    <p>@DateTime.Now.Year</p> <!-- Display current year -->
+                    <h5>@DateTime.Now.ToString("MMMM")</h5>
+                    <p>@DateTime.Now.Year</p>
                 </div>
             </div>
         </div>
@@ -51,49 +51,70 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-between mb-4">
-        <h3>Transaction</h3>
-        <form method="post">
-            <select name="StatusFilter" class="form-select w-auto" onchange="this.form.submit()">
-                <option value="">All</option>
-                <option value="Online" selected="@(Model.StatusFilter == "Online" ? "selected" : "")">Online</option>
-                <option value="Offline" selected="@(Model.StatusFilter == "Offline" ? "selected" : "")">Offline</option>
-            </select>
-        </form>
-    </div>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Dashboard - Fiesta Carnival</h2>
+            </div>
+        </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="transaction-table">
-                <div class="table-responsive">
+        <!-- Unified Tables with Seamless Look -->
+        <div class="row">
+            <!-- Single Header for Both Tables -->
+            <div class="col-12 px-0">
+                <div class="table-header">
+                    <h3 class="table-title">Transaction Data</h3>
+                    <h3 class="table-title">Wiiband Monitor Data</h3>
+                </div>
+            </div>
+
+            <!-- Transaction Data Table -->
+            <div class="col-md-6 px-0">
+                <div class="table-responsive transaction-table">
                     <table class="table table-striped table-hover" id="transactionTable">
                         <thead class="table-primary">
                             <tr>
                                 <th>Transaction Number</th>
-                                <th>Wiiband</th>
                                 <th>Customer Name</th>
                                 <th>Email</th>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                                <th>Remaining Time</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var transaction in Model.Transactions)
+                            @foreach (var entry in Model.DashboardEntries)
                             {
                                 <tr>
-                                    <td>@transaction.TransactionNumber</td>
-                                    <td>@transaction.WiibandID</td>
-                                    <td>@transaction.CustomerName</td>
-                                    <td>@transaction.Email</td>
-                                    <td>@transaction.StartTime?.ToString(@"hh\:mm")</td>
-                                    <td>@transaction.EndTime?.ToString(@"hh\:mm")</td>
-                                    <td>@transaction.RemainingTime</td>
-                                    <td>@transaction.Status</td>
-                                    <td>
-                                        <!-- Assuming deactivation is a link or button; otherwise, remove if not applicable -->
-                                        <a href="#" class="btn btn-danger btn-sm">Deactivate</a>
-                                    </td>
+                                    <td>@entry.TransactionNumber</td>
+                                    <td>@entry.CustomerName</td>
+                                    <td>@entry.Email</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Wiiband Monitor Data Table -->
+            <div class="col-md-6 px-0">
+                <div class="table-responsive transaction-table">
+                    <table class="table table-striped table-hover" id="wiibandMonitorTable">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Wiiband ID</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Remaining Time</th>
+                                <th>Wiiband IP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var monitor in Model.WiibandMonitors)
+                            {
+                                <tr>
+                                    <td>@monitor.WiibandTag</td>
+                                    <td>@monitor.StartTime.ToString("hh\\:mm")</td>
+                                    <td>@(monitor.EndTime.HasValue ? monitor.EndTime.Value.ToString("hh\\:mm") : "N/A")</td>
+                                    <td>N/A</td>
+                                    <td>@monitor.WiibandIP</td>
                                 </tr>
                             }
                         </tbody>
@@ -102,7 +123,9 @@
             </div>
         </div>
     </div>
-</div>
+
+
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 <script>
@@ -118,17 +141,17 @@
                 // Populate table with new data
                 data.forEach(transaction => {
                     const row = document.createElement("tr");
-                    row.innerHTML = `
-                            <td>${transaction.TransactionNumber}</td>
-                            <td>${transaction.WiibandID || 'N/A'}</td>
-                            <td>${transaction.CustomerName || 'N/A'}</td>
-                            <td>${transaction.Email || 'N/A'}</td>
-                            <td>${transaction.StartTime || 'N/A'}</td>
-                            <td>${transaction.EndTime || 'N/A'}</td>
-                            <td>${transaction.RemainingTime || 'N/A'}</td>
-                            <td>${transaction.Status || 'N/A'}</td>
-                            <td>${transaction.BatteryLevel || 'N/A'}%</td>
-                        `;
+                    row.innerHTML =
+                                <td>${transaction.TransactionNumber}</td>
+                                <td>${transaction.WiibandID || 'N/A'}</td>
+                                <td>${transaction.CustomerName || 'N/A'}</td>
+                                <td>${transaction.Email || 'N/A'}</td>
+                                <td>${transaction.StartTime || 'N/A'}</td>
+                                <td>${transaction.EndTime || 'N/A'}</td>
+                                <td>${transaction.RemainingTime || 'N/A'}</td>
+                                <td>${transaction.Status || 'N/A'}</td>
+                                <td>${transaction.BatteryLevel || 'N/A'}%</td>
+                        ;
                     tableBody.appendChild(row);
                 });
             },
@@ -175,14 +198,14 @@
         transition: background-color 0.3s ease;
     }
 
-    .btn-download:hover {
-        background-color: #0056b3;
-        text-decoration: none;
-    }
+        .btn-download:hover {
+            background-color: #0056b3;
+            text-decoration: none;
+        }
 
-    .btn-download i {
-        margin-right: 10px;
-    }
+        .btn-download i {
+            margin-right: 10px;
+        }
 
     .info-card {
         display: flex;
@@ -195,16 +218,16 @@
         cursor: pointer;
     }
 
-    .info-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
 
-    .info-card .icon {
-        font-size: 3rem;
-        color: #007bff;
-        margin-right: 20px;
-    }
+        .info-card .icon {
+            font-size: 3rem;
+            color: #007bff;
+            margin-right: 20px;
+        }
 
     .info-text h5 {
         font-size: 1.8rem;
@@ -217,30 +240,70 @@
         color: #6c757d;
     }
 
-    .transaction-table {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        padding: 20px;
-    }
+        /* Unified Header Styling */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            background-color: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin-bottom: -1px; /* Remove gap between header and table */
+        }
 
-    .table-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+            flex: 1;
+        }
 
-    .table-header h3 {
-        margin: 0;
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
+        /* Remove margin/padding between table containers */
+        .row .col-md-6 {
+            padding: 0; /* Remove padding between the two tables */
+        }
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+        /* Styling for the tables */
+        .transaction-table {
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 0;
+        }
+
+        /* Remove borders and radius in the middle */
+        .table, .table th, .table td {
+            border: none; /* Remove inner table borders */
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9; /* Light gray for alternating rows */
+        }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+       
+
+        /* Unified bottom border for a clean look */
+        .table th, .table td {
+            border-top: 1px solid #ddd;
+        }
+
+        /* Remove border radius from the middle edges */
+        .transaction-table:first-of-type {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .transaction-table:last-of-type {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
 
     th, td {
         padding: 12px 15px;
@@ -273,20 +336,22 @@
         transition: box-shadow 0.3s ease;
     }
 
-    .shadow-hover:hover {
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    }
+        .shadow-hover:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
 
     /* Responsive styles */
-    @@media (max-width: 768px) {
+        @@media (max-width: 768px) {
+            .row .col-md-6 {
+                width: 100%;}
         .info-card {
             flex-direction: column;
             text-align: center;
         }
 
-        .info-card .icon {
-            margin-bottom: 10px;
-        }
+            .info-card .icon {
+                margin-bottom: 10px;
+            }
 
         .info-text h5 {
             font-size: 1.5rem;

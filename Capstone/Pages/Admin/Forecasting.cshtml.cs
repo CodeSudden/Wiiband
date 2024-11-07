@@ -5,13 +5,21 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.TimeSeries;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 
 namespace Capstone.Pages.Admin
 {
     public class ForecastingModel : PageModel
     {
-        // Define separate classes for each forecast output
+        public string ErrorMessage { get; private set; } // Error message to display in the view if needed
+        public List<ForecastedAttendanceWithDate> ForecastedResults { get; private set; }
+
+        public class SalesPrediction
+        {
+            [ColumnName("PredictedLabel")]
+            public bool HighSalesPrediction { get; set; }
+        }
+
         public class PaxQtyForecast
         {
             public float[] ForecastedPaxQty { get; set; }
@@ -22,84 +30,153 @@ namespace Capstone.Pages.Admin
             public float[] ForecastedPaxAmount { get; set; }
         }
 
-        public (List<float> ForecastedPaxQtyValues, List<float> ForecastedPaxAmountValues) ForecastedValues { get; private set; }
-        public List<ForecastedAttendanceWithDate> ForecastedResults { get; private set; }
-
         public void OnGet()
         {
-            // Populate ForecastedValues using PerformForecasting()
-            ForecastedResults = PerformForecasting();
+            try
+            {
+                // Perform forecasting with seasonality and error handling
+                ForecastedResults = PerformForecastingWithSeasonality();
+
+                // Retrieve historical data to train the logistic regression model
+                var mlContext = new MLContext();
+                IDataView dataView = mlContext.Data.LoadFromTextFile<AttendanceData>(
+                    "C:\\Users\\Tine Cacapit\\source\\repos\\WiibandSystem1\\Capstone\\Dataset.csv",
+                    hasHeader: true,
+                    separatorChar: ',');
+
+                var historicalData = mlContext.Data.CreateEnumerable<AttendanceData>(dataView, reuseRowObject: false).ToList();
+
+                // Train the logistic regression model
+                var salesPredictorModel = TrainLogisticRegressionModel(historicalData);
+
+                // Apply logistic regression predictions to each forecasted result
+                foreach (var result in ForecastedResults)
+                {
+                    var inputData = new AttendanceData
+                    {
+                        Date = result.ForecastDate,
+                        OverallPaxQty = result.ForecastedPaxQty,
+                        OverallPaxAmount = result.ForecastedPaxAmount
+                    };
+
+                    // Predict if the sales are high or low
+                    result.HighSalesPrediction = PredictHighSales(inputData, salesPredictorModel);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Capture any errors that occur and display to the user
+                ErrorMessage = $"An error occurred while generating the forecast: {ex.Message}";
+                Console.WriteLine(ex); // For development, use logging in production
+            }
         }
 
-        public List<ForecastedAttendanceWithDate> PerformForecasting()
+        public List<ForecastedAttendanceWithDate> PerformForecastingWithSeasonality()
         {
             var mlContext = new MLContext();
-
-            // Load data
-            IDataView dataView = mlContext.Data.LoadFromTextFile<AttendanceData>(
-                "C:\\Users\\Tine Cacapit\\source\\repos\\WiibandSystem1\\Capstone\\Dataset.csv",
-                hasHeader: true,
-                separatorChar: ',');
-
-            // Set parameters for monthly forecasting
-            int windowSize = 3; // Looking back 3 months for trends
-            int seriesLength = 12; // Monthly data over a year
-            int trainSize = 36; // Training over 3 years of monthly data
-            int horizon = 12; // Forecasting the next 12 months
-
-            // Forecasting pipeline for OverallPaxQty
-            var paxQtyPipeline = mlContext.Forecasting.ForecastBySsa(
-                outputColumnName: "ForecastedPaxQty",
-                inputColumnName: nameof(AttendanceData.OverallPaxQty),
-                windowSize: windowSize,
-                seriesLength: seriesLength,
-                trainSize: trainSize,
-                horizon: horizon);
-
-            // Train the model for OverallPaxQty
-            var paxQtyModel = paxQtyPipeline.Fit(dataView);
-
-            // Make predictions for OverallPaxQty
-            IDataView paxQtyPredictions = paxQtyModel.Transform(dataView);
-            var forecastedPaxQtyData = mlContext.Data.CreateEnumerable<PaxQtyForecast>(paxQtyPredictions, reuseRowObject: false);
-
-            // Forecasting pipeline for OverallPaxAmount
-            var paxAmountPipeline = mlContext.Forecasting.ForecastBySsa(
-                outputColumnName: "ForecastedPaxAmount",
-                inputColumnName: nameof(AttendanceData.OverallPaxAmount),
-                windowSize: windowSize,
-                seriesLength: seriesLength,
-                trainSize: trainSize,
-                horizon: horizon);
-
-            // Train the model for OverallPaxAmount
-            var paxAmountModel = paxAmountPipeline.Fit(dataView);
-
-            // Make predictions for OverallPaxAmount
-            IDataView paxAmountPredictions = paxAmountModel.Transform(dataView);
-            var forecastedPaxAmountData = mlContext.Data.CreateEnumerable<PaxAmountForecast>(paxAmountPredictions, reuseRowObject: false);
-
-            // Collect forecasted values with corresponding dates
             var forecastedResults = new List<ForecastedAttendanceWithDate>();
-            var lastDate = mlContext.Data.CreateEnumerable<AttendanceData>(dataView, reuseRowObject: false).Last().Date;
 
-            for (int i = 0; i < horizon; i++)
+            // Load data with error handling
+            IDataView dataView;
+            try
             {
-                var forecastedPaxQty = forecastedPaxQtyData.First().ForecastedPaxQty[i];
-                var forecastedPaxAmount = forecastedPaxAmountData.First().ForecastedPaxAmount[i];
+                dataView = mlContext.Data.LoadFromTextFile<AttendanceData>(
+                    "C:\\Users\\Tine Cacapit\\source\\repos\\WiibandSystem1\\Capstone\\Dataset.csv",
+                    hasHeader: true,
+                    separatorChar: ',');
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error loading data. Please check the dataset file and ensure it's accessible. Details: " + ex.Message);
+            }
 
-                // Incrementing date by month for each forecasted value
-                var forecastDate = lastDate.AddMonths(i + 1);
+            // Check for missing values in critical columns
+            var dataEnumerable = mlContext.Data.CreateEnumerable<AttendanceData>(dataView, reuseRowObject: false).ToList();
 
-                forecastedResults.Add(new ForecastedAttendanceWithDate
+            if (dataEnumerable.Any(row => row.OverallPaxQty == 0 || row.OverallPaxAmount == 0 || row.Month == 0 || row.Year == 0))
+            {
+                throw new Exception("Dataset contains missing values in required fields. Ensure 'Overall_Pax_QTY', 'Overall_Pax_Amount', 'Month', and 'Year' have no missing values.");
+            }
+
+            // Set parameters to capture monthly seasonality
+            int windowSize = 12; // Capture a yearly seasonality
+            int seriesLength = 36; // 3 years for better trend recognition
+            int trainSize = 36;
+            int horizon = 12;
+
+            try
+            {
+                // Forecasting pipeline for OverallPaxQty
+                var paxQtyPipeline = mlContext.Transforms.Concatenate("Features", "Month", "Year")
+                    .Append(mlContext.Forecasting.ForecastBySsa(
+                        outputColumnName: "ForecastedPaxQty",
+                        inputColumnName: nameof(AttendanceData.OverallPaxQty),
+                        windowSize: windowSize,
+                        seriesLength: seriesLength,
+                        trainSize: trainSize,
+                        horizon: horizon));
+
+                var paxQtyModel = paxQtyPipeline.Fit(dataView);
+                IDataView paxQtyPredictions = paxQtyModel.Transform(dataView);
+                var forecastedPaxQtyData = mlContext.Data.CreateEnumerable<PaxQtyForecast>(paxQtyPredictions, reuseRowObject: false);
+
+                // Forecasting pipeline for OverallPaxAmount
+                var paxAmountPipeline = mlContext.Transforms.Concatenate("Features", "Month", "Year")
+                    .Append(mlContext.Forecasting.ForecastBySsa(
+                        outputColumnName: "ForecastedPaxAmount",
+                        inputColumnName: nameof(AttendanceData.OverallPaxAmount),
+                        windowSize: windowSize,
+                        seriesLength: seriesLength,
+                        trainSize: trainSize,
+                        horizon: horizon));
+
+                var paxAmountModel = paxAmountPipeline.Fit(dataView);
+                IDataView paxAmountPredictions = paxAmountModel.Transform(dataView);
+                var forecastedPaxAmountData = mlContext.Data.CreateEnumerable<PaxAmountForecast>(paxAmountPredictions, reuseRowObject: false);
+
+                var lastDate = dataEnumerable.Last().Date;
+
+                for (int i = 0; i < horizon; i++)
                 {
-                    ForecastDate = forecastDate,
-                    ForecastedPaxQty = forecastedPaxQty,
-                    ForecastedPaxAmount = forecastedPaxAmount
-                });
+                    var forecastedPaxQty = forecastedPaxQtyData.First().ForecastedPaxQty[i];
+                    var forecastedPaxAmount = forecastedPaxAmountData.First().ForecastedPaxAmount[i];
+                    var forecastDate = lastDate.AddMonths(i + 1);
+
+                    forecastedResults.Add(new ForecastedAttendanceWithDate
+                    {
+                        ForecastDate = forecastDate,
+                        ForecastedPaxQty = forecastedPaxQty,
+                        ForecastedPaxAmount = forecastedPaxAmount
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error during forecasting. Please ensure the dataset and model parameters are set correctly. Details: " + ex.Message);
             }
 
             return forecastedResults;
+        }
+
+        private ITransformer TrainLogisticRegressionModel(List<AttendanceData> trainingData)
+        {
+            var mlContext = new MLContext();
+
+            var data = mlContext.Data.LoadFromEnumerable(trainingData);
+
+            var pipeline = mlContext.Transforms.Concatenate("Features", "OverallPaxQty", "OverallPaxAmount")
+                .Append(mlContext.Transforms.Conversion.MapValueToKey("Label", nameof(AttendanceData.HighSales)))
+                .Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression());
+
+            return pipeline.Fit(data);
+        }
+
+        public bool PredictHighSales(AttendanceData input, ITransformer model)
+        {
+            var mlContext = new MLContext();
+            var predictionEngine = mlContext.Model.CreatePredictionEngine<AttendanceData, SalesPrediction>(model);
+            var prediction = predictionEngine.Predict(input);
+            return prediction.HighSalesPrediction;
         }
 
         public class ForecastedAttendanceWithDate
@@ -107,25 +184,15 @@ namespace Capstone.Pages.Admin
             public DateTime ForecastDate { get; set; }
             public float ForecastedPaxQty { get; set; }
             public float ForecastedPaxAmount { get; set; }
+            public bool HighSalesPrediction { get; set; }
         }
 
-        // Define the data structure for input data
         public class AttendanceData
         {
+            public int Id { get; set; }
+
             [LoadColumn(0)]
             public DateTime Date { get; set; }
-
-            [LoadColumn(2)]
-            public float GeneralAdmission { get; set; }
-
-            [LoadColumn(3)]
-            public float ExtendedHour { get; set; }
-
-            [LoadColumn(4)]
-            public float PWDGA { get; set; }
-
-            [LoadColumn(5)]
-            public float EarlyJump { get; set; }
 
             [LoadColumn(6)]
             public float OverallPaxQty { get; set; }
@@ -133,11 +200,13 @@ namespace Capstone.Pages.Admin
             [LoadColumn(7)]
             public float OverallPaxAmount { get; set; }
 
-            [LoadColumn(9)]
-            public float TenHoursMultipass { get; set; }
-
             [LoadColumn(10)]
-            public float TwentyHoursMultipass { get; set; }
+            public int Year { get; set; }
+
+            [LoadColumn(11)]
+            public int Month { get; set; }
+
+            public bool HighSales => OverallPaxAmount > 10000; // Threshold for high sales
         }
     }
 }

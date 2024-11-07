@@ -24,31 +24,40 @@
     </div>
 
     <!-- Info Boxes -->
-    <div class="row text-center">
-        <div class="col-md-4 mb-3">
-            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
-                <i class="bi bi-calendar-check text-primary" style="font-size: 2.5rem;"></i>
-                <div class="info-text mt-2">
-                    <h5 id="month" class="fw-bold"></h5>
-                    <p id="year" class="text-muted"></p>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-calendar-check icon"></i>
+                <div class="info-text">
+                    <h5>@DateTime.Now.ToString("MMMM")</h5>
+                    <p>@DateTime.Now.Year</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
-                <i class="bi bi-people-fill text-primary" style="font-size: 2.5rem;"></i>
-                <div class="info-text mt-2">
-                    <h5 class="fw-bold">12</h5>
-                    <p class="text-muted">Visitors</p>
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-people-fill icon"></i>
+                <div class="info-text">
+                    <h5>@Model.TotalJumpers</h5>
+                    <p>Visitors</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="info-card bg-white border-0 shadow-sm rounded-3 p-4">
-                <i class="bi bi-currency-dollar text-primary" style="font-size: 2.5rem;"></i>
-                <div class="info-text mt-2">
-                    <h5 class="fw-bold">@Model.TotalSales.ToString("C")</h5>
-                    <p class="text-muted">Total Sales</p>
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-watch icon"></i>
+                <div class="info-text">
+                    <h5>9</h5>
+                    <p>Active now</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="info-card shadow-hover">
+                <i class="bi bi-cash-stack icon"></i>
+                <div class="info-text">
+                    <h5>@Model.TotalSalesToday.ToString("C")</h5>
+                    <p>Total Sales</p>
                 </div>
             </div>
         </div>
@@ -75,7 +84,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Transaction Number</th>
-                                <th>Wiiband</th>
+                                <th>Wiiband ID</th>
                                 <th>Customer Name</th>
                                 <th>Email</th>
                                 <th>Start Time</th>
@@ -84,7 +93,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var transaction in Model.Transactions)
+                            @foreach (var entry in Model.DashboardEntries)
                             {
                                 <tr>
                                     <td>@transaction.TransactionNumber</td>
@@ -244,3 +253,4 @@
         }
     }
 </style>
+

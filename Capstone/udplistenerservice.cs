@@ -46,7 +46,7 @@ namespace Capstone
                         else if (receivedData.Contains("SCANNER"))
                         {
                             ProcessScannerData(receivedData, groupEP.Address.ToString());
-                     
+
                         }
 
                     }
@@ -80,12 +80,14 @@ namespace Capstone
 
         private void ProcessScannerData(string data, string clientIPAddress)
         {
-           
+            _logger.LogInformation($"ProcessScannerData called with data: {data}, clientIPAddress: {clientIPAddress}");
+
             string[] parts = data.Split(',');
             if (parts.Length == 2)
             {
                 string scanner = parts[0];
                 string rfidTag = parts[1];
+                _logger.LogInformation($"Parsed scanner: {scanner}, rfidTag: {rfidTag}");
                 SaveToDatabase(rfidTag, clientIPAddress, scanner);
                 SaveScannerLog(rfidTag, clientIPAddress, scanner);
             }
@@ -94,6 +96,7 @@ namespace Capstone
                 _logger.LogWarning("Invalid CLIENT data format.");
             }
         }
+
 
         private void SaveOrUpdateMasterRecord(string rfidTag, string ipAddress, string clientIPAddress)
         {
@@ -213,53 +216,67 @@ namespace Capstone
         private void SaveToDatabase(string tagId, string ipAddress, string scannerLoc)
         {
             using SqlConnection connection = new SqlConnection(_connectionString);
-            connection.Open();
-
-            if (scannerLoc == "SCANNERCOUNTER")
+            try
             {
-                // Update the StartTime for the Dashboard table if SCANNERCOUNTER is detected
-                string updateStartTimeQuery = @"
-            UPDATE wiijump_db.dbo.Dashboard
-            SET StartTime = @startTime
-            WHERE WiibandID = @tagId AND StartTime IS NULL";
+                connection.Open();
+                _logger.LogInformation("Database connection opened in SaveToDatabase.");
 
-                using SqlCommand updateStartCmd = new SqlCommand(updateStartTimeQuery, connection);
-                updateStartCmd.Parameters.AddWithValue("@tagId", tagId);
-                updateStartCmd.Parameters.AddWithValue("@startTime", DateTime.Now);
-
-                int rowsAffected = updateStartCmd.ExecuteNonQuery();
-                if (rowsAffected > 0)
+                if (scannerLoc == "SCANNERCOUNTER")
                 {
-                    _logger.LogInformation("StartTime updated for SCANNERCOUNTER.");
+                    string checkQuery = @"
+            SELECT COUNT(*) FROM wiibandmonitor 
+            WHERE wiibandtag = @tagId AND endtime IS NULL";
+
+                    using SqlCommand checkCmd = new SqlCommand(checkQuery, connection);
+                    checkCmd.Parameters.AddWithValue("@tagId", tagId);
+                    int openEntryCount = (int)checkCmd.ExecuteScalar();
+                    _logger.LogInformation($"Open entry count for tagId {tagId}: {openEntryCount}");
+
+                    if (openEntryCount == 0)
+                    {
+                        string insertQuery = @"
+                INSERT INTO wiibandmonitor (wiibandtag, wiibandip, starttime)
+                VALUES (@tagId, @ipAddress, @starttime)";
+
+                        using SqlCommand insertCmd = new SqlCommand(insertQuery, connection);
+                        insertCmd.Parameters.AddWithValue("@tagId", tagId);
+                        insertCmd.Parameters.AddWithValue("@ipAddress", ipAddress);
+                        insertCmd.Parameters.AddWithValue("@starttime", DateTime.Now);
+
+                        int rowsAffected = insertCmd.ExecuteNonQuery();
+                        _logger.LogInformation($"Inserted new entry for tagId {tagId}. Rows affected: {rowsAffected}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Existing open entry found, not inserting a new record.");
+                    }
+                }
+                else if (scannerLoc == "SCANNEREXIT")
+                {
+                    string updateQuery = @"
+            UPDATE wiibandmonitor
+            SET endtime = @endtime
+            WHERE wiibandtag = @tagId AND endtime IS NULL";
+
+                    using SqlCommand updateCmd = new SqlCommand(updateQuery, connection);
+                    updateCmd.Parameters.AddWithValue("@tagId", tagId);
+                    updateCmd.Parameters.AddWithValue("@endtime", DateTime.Now);
+
+                    int rowsAffected = updateCmd.ExecuteNonQuery();
+                    _logger.LogInformation($"Updated endtime for tagId {tagId}. Rows affected: {rowsAffected}");
                 }
                 else
                 {
-                    _logger.LogWarning("No entry found to update StartTime for SCANNERCOUNTER.");
+                    _logger.LogWarning($"Unrecognized scanner location: {scannerLoc}");
                 }
             }
-            else if (scannerLoc == "SCANNEREXIT")
+            catch (Exception ex)
             {
-                // Update the EndTime for the Dashboard table if SCANNEREXIT is detected
-                string updateEndTimeQuery = @"
-            UPDATE wiijump_db.dbo.Dashboard
-            SET EndTime = @endTime
-            WHERE WiibandID = @tagId AND EndTime IS NULL";
-
-                using SqlCommand updateEndCmd = new SqlCommand(updateEndTimeQuery, connection);
-                updateEndCmd.Parameters.AddWithValue("@tagId", tagId);
-                updateEndCmd.Parameters.AddWithValue("@endTime", DateTime.Now);
-
-                int rowsAffected = updateEndCmd.ExecuteNonQuery();
-                if (rowsAffected > 0)
-                {
-                    _logger.LogInformation("EndTime updated for SCANNEREXIT.");
-                }
-                else
-                {
-                    _logger.LogWarning("No entry found to update EndTime for SCANNEREXIT.");
-                }
+                _logger.LogError(ex, "Error in SaveToDatabase");
             }
         }
+
+
 
         private void SaveScannerLog(string tagId, string ipAddress, string scannerLoc)
         {
