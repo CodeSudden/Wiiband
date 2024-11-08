@@ -13,14 +13,6 @@ namespace Capstone.Data // Replace with your actual namespace if different
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-        public DbSet<Visitor> Visitors { get; set; }
-
-        public class Visitor // visitor count
-        {
-            public int Id { get; set; } // Primary key for the Visitor table
-            public int TransactionCount { get; set; }
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Visitor>()
@@ -32,18 +24,19 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public void UpdateTransactionCountInVisitors()
         {
             // Clear the Visitors table to only keep the latest transaction count
-            Visitors.RemoveRange(Visitors); // Clear all entries in Visitors
+            Visitor.RemoveRange(Visitor); // Clear all entries in Visitors
 
             // Count the transactions and add a new record to Visitors
             var transactionCount = Transactions.Count();
-            Visitors.Add(new Visitor { TransactionCount = transactionCount });
+            Visitor.Add(new Visitor { TransactionCount = transactionCount });
             SaveChanges();
         }
 
         public int GetTransactionCountFromVisitors()
         {
-            return Visitors.FirstOrDefault()?.TransactionCount ?? 0;
+            return Visitor.FirstOrDefault()?.TransactionCount ?? 0;
         }
+
         public int GetTotalJumpers()
         {
             return Customers.Sum(c => c.Num_jumpers);
@@ -153,23 +146,29 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public DbSet<Customers> Customers { get; set; }
         public DbSet<Events> Events { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Visitor> Visitor { get; set; }
         public object Dashboard { get; internal set; }
         public object Wiiband { get; internal set; }
         public object WiibandModel { get; internal set; }
     }
+    public class Visitor // visitor count
+    {
+        public int Id { get; set; } // Primary key for the Visitor table
+        public int TransactionCount { get; set; }
+    }
     public class Transaction
     {
         public int Id { get; set; }
-        public string TransactionNumber { get; set; }
+        public string? TransactionNumber { get; set; }
         public int WiibandID { get; set; }
-        public string CustomerName { get; set; }
-        public string Email { get; set; }
+        public string? CustomerName { get; set; }
+        public string? Email { get; set; }
         public TimeSpan? StartTime { get; set; }
         public TimeSpan? EndTime { get; set; }
-        public string RemainingTime { get; set; }
+        public string? RemainingTime { get; set; }
         public decimal Amount { get; set; } // assuming this is used for sales calculation
         public DateTime Date { get; set; } // assuming for GetTotalSalesForToday logic
-        public string Status { get; set; } // e.g., "Online" or "Offline"
+        public string? Status { get; set; } // e.g., "Online" or "Offline"
         public int TransactionID { get; internal set; }
         public bool IsActive { get; internal set; }
     }
@@ -188,7 +187,7 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public required string CustomerName { get; set; }
         public required string Email { get; set; }
     }
-  
+
     public class Customers
     {
         public int Id { get; set; }
@@ -242,3 +241,4 @@ namespace Capstone.Data // Replace with your actual namespace if different
         public int PartyEquipUtils { get; set; }
         public DateTime Created_at { get; set; }
     }
+}

@@ -16,7 +16,7 @@ namespace Capstone.Pages.Admin
         private readonly DashboardService _dashboardService;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public List<Transactions> Transactions { get; set; } = new List<Transactions>();
+        public List<Transaction> Transactions { get; set; } = new List<Transaction>();
         [BindProperty(SupportsGet = true)]
         public string StatusFilter { get; set; }
         public decimal TotalSales { get; private set; }

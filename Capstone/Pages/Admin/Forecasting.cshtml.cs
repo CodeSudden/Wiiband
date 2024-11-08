@@ -1,17 +1,20 @@
+using Capstone.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Transforms.TimeSeries;
+using Stripe;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace Capstone.Pages.Admin
 {
     public class ForecastingModel : PageModel
     {
-        public string ErrorMessage { get; private set; } // Error message to display in the view if needed
+        public string? ErrorMessage { get; private set; } // Error message to display in the view if needed
         public List<ForecastedAttendanceWithDate> ForecastedResults { get; private set; }
 
         public class SalesPrediction
@@ -165,8 +168,7 @@ namespace Capstone.Pages.Admin
             var data = mlContext.Data.LoadFromEnumerable(trainingData);
 
             var pipeline = mlContext.Transforms.Concatenate("Features", "OverallPaxQty", "OverallPaxAmount")
-                .Append(mlContext.Transforms.Conversion.MapValueToKey("Label", nameof(AttendanceData.HighSales)))
-                .Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression());
+            .Append(mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(labelColumnName: nameof(AttendanceData.HighSales)));
 
             return pipeline.Fit(data);
         }
@@ -189,9 +191,10 @@ namespace Capstone.Pages.Admin
 
         public class AttendanceData
         {
+            [LoadColumn(0)]
             public int Id { get; set; }
 
-            [LoadColumn(0)]
+            [LoadColumn(1)]
             public DateTime Date { get; set; }
 
             [LoadColumn(6)]
@@ -206,6 +209,7 @@ namespace Capstone.Pages.Admin
             [LoadColumn(11)]
             public int Month { get; set; }
 
+            [LoadColumn(12)]
             public bool HighSales => OverallPaxAmount > 10000; // Threshold for high sales
         }
     }
